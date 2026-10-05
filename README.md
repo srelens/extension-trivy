@@ -6,9 +6,9 @@ Planned executable reference app for [srelens/srelens#521](https://github.com/sr
 
 ## Current status
 
-Implementation has started with an offline scanner and executable feasibility probe. The probe scans real pinned image/DB fixtures in process, speaks the Go SDK's JSON-RPC protocol and has run in the unchanged Linux arm64 sandbox. It is not an installable app or release yet.
+Implementation has started with an offline scanner and executable feasibility probe. The probe scans real pinned image/DB fixtures in process and speaks the Go SDK's JSON-RPC protocol. A signed [local macOS preview](local-preview/README.md) has been installed and invoked inside the srelens desktop host. It is not a production app or release.
 
-The feasibility gate remains open: the stripped scanner exceeds the host's current package limits, Windows AppContainer execution needs a runner, and review found an incomplete APK inventory case plus missing in-flight cancellation evidence. The prototype is for the pinned fixtures only. Production host APIs, Operator integration, persistent reports and dashboard screens remain pending. The existing host also needs generic binding-availability, artifact-transfer and executable-result surfaces, plus a reader that exposes workload images.
+The feasibility gate remains open: Windows AppContainer execution needs a runner, and review found an incomplete APK inventory case plus missing in-flight cancellation evidence. The original package-size blocker is cleared for the local preview by host commit `ec264a683e8953eff190444938097a6ba5fac9be`, which enables macOS execution and 512 MiB package limits. The prototype is for the pinned fixtures only. Production host APIs, Operator integration, persistent reports and dashboard screens remain pending. The host also needs generic binding-availability, artifact-transfer and executable-result surfaces, plus a reader that exposes workload images.
 
 - [Design](docs/superpowers/specs/2026-10-05-trivy-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-05-trivy-executable.md)
