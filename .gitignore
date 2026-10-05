@@ -1,0 +1,7 @@
+.host/
+dist/
+bin/
+.screenshots/
+.DS_Store
+coverage.out
+*.test
