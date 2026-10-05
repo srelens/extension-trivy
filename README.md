@@ -6,13 +6,17 @@ Planned executable reference app for [srelens/srelens#521](https://github.com/sr
 
 ## Current status
 
-This repository contains the design and implementation plan. It does not contain a runnable app, manifest or release yet. The existing host needs generic binding-availability, artifact-transfer and executable-result surfaces, plus a reader that exposes workload images, before this app can provide the complete experience.
+Implementation has started with an offline scanner and executable feasibility probe. The probe scans real pinned image/DB fixtures in process, speaks the Go SDK's JSON-RPC protocol and has run in the unchanged Linux arm64 sandbox. It is not an installable app or release yet.
+
+The feasibility gate remains open: the stripped scanner exceeds the host's current package limits, Windows AppContainer execution needs a runner, and review found an incomplete APK inventory case plus missing in-flight cancellation evidence. The prototype is for the pinned fixtures only. Production host APIs, Operator integration, persistent reports and dashboard screens remain pending. The existing host also needs generic binding-availability, artifact-transfer and executable-result surfaces, plus a reader that exposes workload images.
 
 - [Design](docs/superpowers/specs/2026-10-05-trivy-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-05-trivy-executable.md)
+- [Feasibility evidence and reproduction](docs/feasibility.md)
+- [Proposed host contract](docs/host-contract.md)
 - [Contributor rules](AGENTS.md)
 
-The first milestone proves an offline Trivy scan under the real Linux and Windows sandboxes. It must fit the host's current resource limits before production implementation proceeds.
+The first milestone requires real Linux and Windows sandbox execution and an installable native package. It must fit the host's resource and package limits before production implementation proceeds. Prepare the pinned host SDK and checksum-guarded Trivy compatibility source as described in the feasibility document before running Go commands.
 
 ## First release
 

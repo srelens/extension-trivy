@@ -1,0 +1,5 @@
+--- a/pkg/fanal/analyzer/fs.go
++++ b/pkg/fanal/analyzer/fs.go
+@@ -58 +58 @@
+-	if err = os.Chmod(f.Name(), 0o600); err != nil {
++	if err = f.Chmod(0o600); err != nil {

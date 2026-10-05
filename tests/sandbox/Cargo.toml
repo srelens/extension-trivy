@@ -1,0 +1,17 @@
+[package]
+name = "trivy-sandbox-proof"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+srelens-plugin-host = { path = "../../.host/crates/plugin-host" }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt", "time"] }
+tempfile = "3"
+
+[[bin]]
+name = "srelens-sandbox-launch"
+path = "src/launcher.rs"

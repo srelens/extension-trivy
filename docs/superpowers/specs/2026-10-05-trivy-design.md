@@ -1,6 +1,6 @@
 # Trivy executable app design
 
-Date: 2026-10-05. Status: planning; production implementation has not started.
+Date: 2026-10-05. Status: feasibility prototype implemented; production gate remains open. See [measured evidence](../../feasibility.md) for package size, incomplete APK inventory and missing execution/cancellation proof.
 
 ## Intent and acceptance
 
@@ -28,6 +28,7 @@ Inspected host baseline: `d3fd0618239b91ec83aa354bea57beeea41c464a` on `dev`. Th
 - App resource pages require a custom-resource binding. They cannot currently render arbitrary executable scan reports. Sidecar operations are exposed through MCP, not a complete native scan page.
 - CRD checking already distinguishes served, absent and unknown internally (`crd::Served`), but the sidecar has no typed binding-availability callback. Reuse that check; do not parse human-readable error strings to select a source.
 - Limits are 256 MiB memory, one CPU, 1 GiB scoped data, 100,000 data entries and a 30-second ordinary request deadline. Long scans need a stream with cancellation, not a larger global request timeout.
+- Native packages allow 16 MiB compressed and 64 MiB total unpacked. The current embedded scanner exceeds both limits; distribution needs a reviewed decision before production work.
 - Windows and suitable Linux desktops run sidecars. macOS remains refused pending the host's watchdog/Seatbelt validation; the web host refuses executable apps.
 
 Trivy candidate: `v0.75.0`, commit `591e9799316a602e703f0b484f6c6d7b234ec8f3`; its `go.mod` requires Go 1.27.0. Its artifact package exports `NewRunner` and `Runner.ScanImage`. Treat the candidate as unvalidated until the feasibility milestone passes. Trivy's scanner API is pinned implementation detail, not the app's public contract.
@@ -92,13 +93,14 @@ Production ID: `org.srelens.trivy`. Unsigned local testing uses a nonreserved ID
 - Native screens: Overview, Images, Reports and Findings. Display source, report category and subject, progress, image digest, scan/report time, scanner version, database digest/age for app scans and Critical/High/Medium/Low/Unknown totals. Each severity carries its name. A field not supplied by an Operator report is unknown, never invented from local scanner metadata.
 - Findings expose vulnerability ID, severity, package, installed version, fixed version, target and title. List requests return at most 100 rows with a cursor, not an unbounded JSON result. Do not deduplicate distinct package/target occurrences solely by CVE ID.
 - Persist at most 10 completed reports. Evict oldest reports and disposable image artifacts before acquisition; preserve the active database where it fits. Reuse only matching digest, platform, engine version and database digest. A DB older than 24 hours is visibly stale and must not produce an unqualified clean result.
+- Store report metadata as JSON and findings as JSONL beneath the private host-owned app data root. Operator CRs remain the cluster's authoritative results; normalized Operator data is a bounded local cache. The 1 GiB budget is shared by reports, DB, image artifacts, temporary files and staging. Use atomic writes, retain local results through restart/update and remove app-owned data on uninstall. No separate server or cluster storage is required for fallback results.
 - A failed scan, empty input, unsupported platform, failed read, DB failure, cancellation, timeout or disk/memory refusal has its own state and reason. Only a completed supported scan can report zero vulnerabilities.
 
 Proposed app interface: scan stream `scan {clusterId, namespace?, image, platform}`; ordinary operations `source-status {clusterId, namespace?}`, `list-reports {clusterId, namespace?, cursor?, limit?}`, `list-images {clusterId, namespace?}` and `findings {reportId, cursor?, limit?}`. Default report/finding limit is 100, with 1–100 accepted. These names and limits are held by tests; the host bridge must verify the report belongs to the current app and selected context.
 
 ## Repository and distribution
 
-Use a small Go module with `cmd/trivy-sidecar`, `internal/operator`, `internal/scanner`, `internal/reports` and `internal/workloads`, plus `manifest.json`, `compatibility.json`, packaging scripts and CI. Keep platform additions in the host repository. Do not duplicate the JSON-RPC SDK or fork Trivy.
+Use a small Go module with `cmd/trivy-sidecar`, `internal/operator`, `internal/scanner`, `internal/reports` and `internal/workloads`, plus `manifest.json`, `compatibility.json`, packaging scripts and CI. Keep platform additions in the host repository. Do not duplicate the JSON-RPC SDK or maintain an independent Trivy fork. The feasibility prototype carries one checksum-guarded file-descriptor chmod compatibility patch in pinned upstream source; its modified engine identity and exact hashes are recorded in the evidence document. Remove that patch when an upstream revision provides the same behavior.
 
 Prepare `.host` at the pinned compatibility revision and use `replace github.com/srelens/srelens/sdk/go => ./.host/sdk/go` for the unpublished SDK. After host prerequisites land, update the recorded revision and repeat compatibility tests. The release packages only actual tested binaries under `bin/<platform>/`, README, license and `icons/icon.svg`; DB/artifact caches are runtime data, not unsupported package payloads.
 
@@ -106,7 +108,7 @@ Initial execution targets: `linux-amd64`, `linux-arm64` and `windows-amd64`. A c
 
 ## Acceptance and sequencing
 
-First prove one real offline scan under existing sandbox limits on Linux and Windows, including filesystem syscall behavior, cancellation and memory measurement. If this fails, record the evidence and revise the scanner integration; do not ship a weakened sandbox or silently substitute an Operator/server dependency.
+First prove one real offline scan under existing sandbox limits on Linux and Windows, including filesystem syscall behavior, cancellation and memory measurement, and verify the executable fits the native package. If this fails, record the evidence and revise the scanner integration/distribution contract; do not ship a weakened sandbox, raise global package limits or silently substitute an Operator/server dependency.
 
 Pre-release acceptance uses a cluster with no Trivy Operator CRDs or deployment. Install a candidate package through Settings → Apps, scan a pinned known-vulnerable fixture and a supported zero-findings fixture, verify workload discovery and native results, deny RBAC and registry access, cancel a scan, crash/restart the sidecar, and disable/update/remove the app. All nine #521 executable criteria require real-supervisor evidence. Inspect narrow and wide UI panes. Record tested revisions, DB/image digests and platform results before catalog publication. Once publication is requested and completes, repeat installation from the signed catalog before marking the reference-app milestone complete.
 
