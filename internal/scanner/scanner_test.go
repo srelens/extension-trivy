@@ -50,7 +50,7 @@ func TestScanArchiveOffline(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if report.Trivy.Version != "0.75.0+srelens.1" || report.Metadata.ImageID != "sha256:055936d3920576da37aa9bc460d70c5f212028bda1c08c0879aedf03d7a66ea1" {
+	if report.Trivy.Version != "0.75.0+srelens.2" || report.Metadata.ImageID != "sha256:055936d3920576da37aa9bc460d70c5f212028bda1c08c0879aedf03d7a66ea1" {
 		t.Fatalf("scanner/image identity missing or wrong: %#v, %s", report.Trivy, report.Metadata.ImageID)
 	}
 	// A CVE can affect multiple packages. Neither occurrence may disappear.

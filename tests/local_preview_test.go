@@ -80,7 +80,7 @@ func TestLocalPreviewFixtureOperation(t *testing.T) {
 				if line["error"] != nil || json.Unmarshal(line["result"], &result) != nil {
 					t.Fatalf("fixture operation failed: %v", line)
 				}
-				if result.State != "completed" || result.Source != "pinned-fixture" || result.EngineVersion != "0.75.0+srelens.1" || result.ImageID != "sha256:055936d3920576da37aa9bc460d70c5f212028bda1c08c0879aedf03d7a66ea1" || len(result.Findings) != 6 {
+				if result.State != "completed" || result.Source != "pinned-fixture" || result.EngineVersion != "0.75.0+srelens.2" || result.ImageID != "sha256:055936d3920576da37aa9bc460d70c5f212028bda1c08c0879aedf03d7a66ea1" || len(result.Findings) != 6 {
 					t.Fatalf("wrong fixture identity or findings: %+v", result)
 				}
 			} else if line["error"] == nil || line["result"] != nil {

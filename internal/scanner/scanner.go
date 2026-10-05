@@ -21,7 +21,7 @@ var (
 	ErrOutsideData = errors.New("the artifact is outside the app data directory or is a symlink")
 )
 
-const Version = "0.75.0+srelens.1"
+const Version = "0.75.0+srelens.2"
 
 // Trivy's vulnerability DB is process-global. Only one runner may own it.
 var scanSlot = make(chan struct{}, 1)
