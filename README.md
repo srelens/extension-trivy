@@ -10,12 +10,13 @@ The current development build has native Overview, Images, Reports and Findings 
 
 **In-cluster Job scanning is implemented with explicit Scan namespace and Scan image operations.** The user selected this fallback on 2026-10-06, superseding the local in-process scanner and OCI acquisition plan. Normal controller packages now use only the SDK and Go standard library. The previous scanner prototype is preserved as an optional nested module in `tools/local-scanner`; it is excluded from normal builds/tests. Local scanner/database storage is no longer required, so the Trivy-only data exception was removed in favor of the ordinary 1 GiB limit.
 
-The container-scan controller uses extension API 0.8 and sidecar protocol 0.2.0 from host commit `442d0fc4b56a4f82a6dca0815cdc077eee0e3284`. The signed macOS controller passed real namespace/image scans, registry failure and cancellation through the production registry and OS sandbox. The test namespace produced 17 findings and the image one critical vulnerability. Workload discovery passed through the production registry and OS sandbox without MCP. The original signed fixture preview remains separate. Windows AppContainer execution and release/catalog acceptance are still pending. No package has been published.
+The controller uses extension API 0.8 and sidecar protocol 0.2.0 from pinned host commit `c72ba93dc456312ccef02f589ca088cd596d733d`. Images use bounded cursor pages across Deployments, StatefulSets and DaemonSets, so all-namespace inventories can exceed 1,000 container images. The signed package read all 1,880 container images across 59 M01 namespaces in 17 pages through the production registry and macOS sandbox. Previous container-scan acceptance is recorded in [Local container scans](docs/local-container-scans.md). The signed macOS controller passed real namespace/image scans, registry failure and cancellation through the production registry and OS sandbox. The test namespace produced 17 findings and the image one critical vulnerability. Workload discovery passed through the production registry and OS sandbox without MCP. The original signed fixture preview remains separate. Windows AppContainer execution and release/catalog acceptance are still pending. No package has been published.
 
 - [Current design](docs/superpowers/specs/2026-10-06-trivy-job-fallback-design.md)
 - [Current implementation plan](docs/superpowers/plans/2026-10-06-trivy-job-fallback.md)
 - [Feasibility evidence and reproduction](docs/feasibility.md)
 - [Container scan acceptance](docs/local-container-scans.md)
+- [Large inventory and UI acceptance](docs/local-paged-inventory.md)
 - [Historical reader testing and acceptance](docs/local-readers.md)
 - [Host contract and proposed scanning additions](docs/host-contract.md)
 - [Contributor rules](AGENTS.md)
@@ -27,7 +28,7 @@ Prepare the pinned host SDK with `scripts/prepare_host.py` before running normal
 - Automatically prefer available Trivy Operator reports, showing vulnerabilities, configuration/RBAC/infrastructure checks, SBOM, compliance and exposed-secret finding metadata where the cluster serves those report kinds.
 - Keep report source and age visible. Missing reports, denied reads and failed discovery are distinct states; no automatic duplicate scan while Operator reports are the selected source.
 - Scan a public container image directly, without workload discovery or Operator CRDs being a prerequisite for the scan itself.
-- Discover regular and init-container images from Deployments, StatefulSets and DaemonSets through a narrow broker reader.
+- Discover regular and init-container images from Deployments, StatefulSets and DaemonSets through narrow, paginated broker readers. Use Next page and Previous page to browse large inventories; filtering searches the current page.
 - Show native scan progress, severity totals, findings and fixed versions.
 - Keep bounded reports in the app's scoped data directory; scanner databases and image layers live only in the temporary cluster Job.
 - Ship a signed `.srelens-extension` package with per-platform binaries and the official Trivy logo.

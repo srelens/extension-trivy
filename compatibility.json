@@ -1,6 +1,6 @@
 {
   "status": "local-development-accepted",
-  "hostRevision": "442d0fc4b56a4f82a6dca0815cdc077eee0e3284",
+  "hostRevision": "c72ba93dc456312ccef02f589ca088cd596d733d",
   "extensionApi": "^0.8",
   "sidecarProtocol": "0.2.0",
   "trivyVersion": "0.75.0",
@@ -12,5 +12,12 @@
     "windows-amd64": "not-tested"
   },
   "scannerPlatform": "Linux in Kubernetes; namespace default image platform and manual worker architecture",
-  "releasePublished": false
+  "releasePublished": false,
+  "inventoryAcceptance": {
+    "images": 1880,
+    "namespaces": 59,
+    "pages": 17,
+    "mode": "signed production sidecar and macOS sandbox; M01 all namespaces",
+    "appRevision": 20
+  }
 }
