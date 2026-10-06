@@ -1,3 +1,5 @@
+> Superseded for fallback execution by [the in-cluster Job design](2026-10-06-trivy-job-fallback-design.md), selected by the user on 2026-10-06. Historical local scanner evidence below is preserved.
+
 # Trivy executable app design
 
 Date: 2026-10-05. Status: feasibility prototype implemented; production gate remains open. See [measured evidence](../../feasibility.md) for package size, incomplete APK inventory and missing execution/cancellation proof.
