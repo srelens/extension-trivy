@@ -19,7 +19,8 @@
       },
       "inputs": [
         "context",
-        "namespace"
+        "namespace",
+        "cursor"
       ]
     },
     {
@@ -31,7 +32,8 @@
       },
       "inputs": [
         "context",
-        "namespace"
+        "namespace",
+        "cursor"
       ]
     },
     {
@@ -43,7 +45,8 @@
       },
       "inputs": [
         "context",
-        "namespace"
+        "namespace",
+        "cursor"
       ]
     },
     {
@@ -1349,6 +1352,11 @@
             "title": "Namespace",
             "type": "string",
             "maxLength": 63
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "maxLength": 8192
           }
         ]
       },

@@ -19,7 +19,8 @@ class ManifestContract(unittest.TestCase):
             self.assertRegex(readers[name]["arguments"]["image"], r"^aquasec/trivy@sha256:[0-9a-f]{64}$")
         for name in ("deployment-images", "statefulset-images", "daemonset-images"):
             self.assertEqual(readers[name]["target"], "k8s.listWorkloadImages")
-            self.assertEqual(readers[name]["inputs"], ["context", "namespace"])
+            self.assertEqual(readers[name]["inputs"], ["context", "namespace", "cursor"])
+        self.assertIn("cursor", {row["name"] for row in manifest["sidecar"]["operations"] if row["name"] == "list-images" for row in row["inputs"]})
         operations = {row["name"]: row for row in manifest["sidecar"]["operations"]}
         self.assertTrue(operations["source-status"]["view"]["autoRun"])
         self.assertTrue(operations["findings"]["view"]["hidden"])

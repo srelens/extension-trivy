@@ -49,12 +49,12 @@ func New() *sidecar.Sidecar {
 	sidecar.Operation(s, "source-status", func(ctx context.Context, in Scope) (operator.Status, error) {
 		return operator.SourceStatus(ctx, sidecar.HostFrom(ctx), in.ClusterID, in.Namespace)
 	})
-	sidecar.Operation(s, "list-images", func(ctx context.Context, in Scope) (map[string]any, error) {
-		rows, err := workloads.ListImages(ctx, sidecar.HostFrom(ctx), in.ClusterID, in.Namespace)
+	sidecar.Operation(s, "list-images", func(ctx context.Context, in listInput) (map[string]any, error) {
+		page, err := workloads.ListImagePage(ctx, sidecar.HostFrom(ctx), in.ClusterID, in.Namespace, in.Cursor)
 		if err != nil {
 			return nil, err
 		}
-		return map[string]any{"clusterId": in.ClusterID, "source": "workload templates", "scope": "Deployments, StatefulSets and DaemonSets; regular and init containers", "items": rows}, nil
+		return map[string]any{"clusterId": in.ClusterID, "source": "workload templates", "scope": "Deployments, StatefulSets and DaemonSets; regular and init containers", "items": page.Items, "nextCursor": page.NextCursor}, nil
 	})
 	allReports := func(ctx context.Context, in Scope) ([]reports.Metadata, []string, error) {
 		rows, warnings, err := operator.ListReportInventory(ctx, sidecar.HostFrom(ctx), in.ClusterID, in.Namespace)
