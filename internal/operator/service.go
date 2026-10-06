@@ -50,7 +50,7 @@ func SourceStatus(ctx context.Context, b Broker, cluster string, namespace *stri
 	}
 	result.Source = "app"
 	result.ClusterID = cluster
-	result.Scope = "No Operator report APIs are served. Workload images can be inspected; local image scanning is not available in this build."
+	result.Scope = "No Operator report APIs are served. Use Scan namespace or Scan image to run an explicit temporary container scan."
 	seen := map[string]bool{}
 	served, unknown := false, false
 	for _, row := range result.Bindings {
@@ -77,9 +77,9 @@ func SourceStatus(ctx context.Context, b Broker, cluster string, namespace *stri
 		result.Source = "unknown"
 		result.Scope = "Operator discovery failed for one or more report APIs; retry before selecting a report source."
 	}
-	if served {
+	if served && !unknown {
 		result.Source = "operator"
-		result.Scope = "Available Operator categories; missing report kinds remain unavailable. Local image scanning is not available in this build."
+		result.Scope = "Published Operator categories are preferred. Use Scan namespace to scan missing vulnerability/configuration categories, or Scan image for an explicit image scan."
 	}
 	return result, nil
 }

@@ -6,7 +6,8 @@
   "kind": "executable",
   "permissions": [
     "k8s.listWorkloadImages",
-    "k8s.listCustomResource"
+    "k8s.listCustomResource",
+    "k8s.runJob"
   ],
   "capabilities": [
     {
@@ -914,6 +915,394 @@
         "context",
         "namespace"
       ]
+    },
+    {
+      "name": "namespace-job",
+      "title": "Scan namespace (vuln,misconfig)",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "trivy"
+        ],
+        "args": [
+          "k8s",
+          "--format",
+          "json",
+          "--report",
+          "all",
+          "--scanners",
+          "vuln,misconfig",
+          "--disable-node-collector",
+          "--include-namespaces",
+          "${inputs.namespace}",
+          "--include-kinds",
+          "Deployment,StatefulSet,DaemonSet,Pod,Job,CronJob,Service,ConfigMap,ServiceAccount,Role,RoleBinding,NetworkPolicy,Ingress,PersistentVolumeClaim,LimitRange,ResourceQuota,PodDisruptionBudget",
+          "--exclude-owned",
+          "--timeout",
+          "15m",
+          "--parallel",
+          "1",
+          "--no-progress",
+          "--quiet"
+        ],
+        "inputNames": [
+          "namespace"
+        ],
+        "readRules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods",
+              "services",
+              "configmaps",
+              "serviceaccounts",
+              "persistentvolumeclaims",
+              "limitranges",
+              "resourcequotas"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "apps"
+            ],
+            "resources": [
+              "deployments",
+              "statefulsets",
+              "daemonsets",
+              "replicasets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "batch"
+            ],
+            "resources": [
+              "jobs",
+              "cronjobs"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "networking.k8s.io"
+            ],
+            "resources": [
+              "ingresses",
+              "networkpolicies"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "rbac.authorization.k8s.io"
+            ],
+            "resources": [
+              "roles",
+              "rolebindings"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "policy"
+            ],
+            "resources": [
+              "poddisruptionbudgets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "namespace-config-job",
+      "title": "Scan namespace (misconfig)",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "trivy"
+        ],
+        "args": [
+          "k8s",
+          "--format",
+          "json",
+          "--report",
+          "all",
+          "--scanners",
+          "misconfig",
+          "--disable-node-collector",
+          "--include-namespaces",
+          "${inputs.namespace}",
+          "--include-kinds",
+          "Deployment,StatefulSet,DaemonSet,Pod,Job,CronJob,Service,ConfigMap,ServiceAccount,Role,RoleBinding,NetworkPolicy,Ingress,PersistentVolumeClaim,LimitRange,ResourceQuota,PodDisruptionBudget",
+          "--exclude-owned",
+          "--timeout",
+          "15m",
+          "--parallel",
+          "1",
+          "--no-progress",
+          "--quiet"
+        ],
+        "inputNames": [
+          "namespace"
+        ],
+        "readRules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods",
+              "services",
+              "configmaps",
+              "serviceaccounts",
+              "persistentvolumeclaims",
+              "limitranges",
+              "resourcequotas"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "apps"
+            ],
+            "resources": [
+              "deployments",
+              "statefulsets",
+              "daemonsets",
+              "replicasets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "batch"
+            ],
+            "resources": [
+              "jobs",
+              "cronjobs"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "networking.k8s.io"
+            ],
+            "resources": [
+              "ingresses",
+              "networkpolicies"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "rbac.authorization.k8s.io"
+            ],
+            "resources": [
+              "roles",
+              "rolebindings"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "policy"
+            ],
+            "resources": [
+              "poddisruptionbudgets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "namespace-vulnerability-job",
+      "title": "Scan namespace (vuln)",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "trivy"
+        ],
+        "args": [
+          "k8s",
+          "--format",
+          "json",
+          "--report",
+          "all",
+          "--scanners",
+          "vuln",
+          "--disable-node-collector",
+          "--include-namespaces",
+          "${inputs.namespace}",
+          "--include-kinds",
+          "Deployment,StatefulSet,DaemonSet,Pod,Job,CronJob,Service,ConfigMap,ServiceAccount,Role,RoleBinding,NetworkPolicy,Ingress,PersistentVolumeClaim,LimitRange,ResourceQuota,PodDisruptionBudget",
+          "--exclude-owned",
+          "--timeout",
+          "15m",
+          "--parallel",
+          "1",
+          "--no-progress",
+          "--quiet"
+        ],
+        "inputNames": [
+          "namespace"
+        ],
+        "readRules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods",
+              "services",
+              "configmaps",
+              "serviceaccounts",
+              "persistentvolumeclaims",
+              "limitranges",
+              "resourcequotas"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "apps"
+            ],
+            "resources": [
+              "deployments",
+              "statefulsets",
+              "daemonsets",
+              "replicasets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "batch"
+            ],
+            "resources": [
+              "jobs",
+              "cronjobs"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "networking.k8s.io"
+            ],
+            "resources": [
+              "ingresses",
+              "networkpolicies"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "rbac.authorization.k8s.io"
+            ],
+            "resources": [
+              "roles",
+              "rolebindings"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "policy"
+            ],
+            "resources": [
+              "poddisruptionbudgets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "image-job",
+      "title": "Scan image vulnerabilities",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "/bin/sh",
+          "-c"
+        ],
+        "args": [
+          "case $(uname -m) in aarch64|arm64) platform=linux/arm64;; x86_64) platform=linux/amd64;; *) echo unsupported-worker-architecture >&2; exit 1;; esac; exec trivy image --format json --scanners vuln --platform \"$platform\" --timeout 15m --parallel 1 --no-progress --quiet -- \"$1\"",
+          "trivy-scan",
+          "${inputs.image}"
+        ],
+        "inputNames": [
+          "image"
+        ],
+        "readRules": []
+      }
     }
   ],
   "sidecar": {
@@ -1027,6 +1416,57 @@
           {
             "name": "limit",
             "type": "integer"
+          }
+        ]
+      },
+      {
+        "name": "scan-namespace",
+        "title": "Scan namespace",
+        "view": {
+          "stream": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "required": true,
+            "maxLength": 63
+          }
+        ]
+      },
+      {
+        "name": "scan-image",
+        "title": "Scan image",
+        "view": {
+          "stream": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "required": true,
+            "maxLength": 63
+          },
+          {
+            "name": "image",
+            "title": "Image",
+            "type": "string",
+            "required": true,
+            "maxLength": 512
           }
         ]
       }

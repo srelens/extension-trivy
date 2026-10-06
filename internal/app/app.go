@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/srelens/extension-trivy/internal/jobs"
 	"github.com/srelens/extension-trivy/internal/operator"
 	"github.com/srelens/extension-trivy/internal/reports"
 	"github.com/srelens/extension-trivy/internal/workloads"
@@ -155,6 +156,40 @@ func New() *sidecar.Sidecar {
 			return reports.FindingPage{}, sidecar.InvalidParams("Report belongs to another namespace")
 		}
 		return page, err
+	})
+
+	var runnerOnce sync.Once
+	var runner *jobs.Runner
+	getRunner := func(ctx context.Context) (*jobs.Runner, error) {
+		store, err := getStore(ctx)
+		if err != nil {
+			return nil, err
+		}
+		runnerOnce.Do(func() { runner = &jobs.Runner{Broker: sidecar.HostFrom(ctx), Store: store, Dir: sidecar.DataDir(ctx)} })
+		return runner, nil
+	}
+	sidecar.Stream(s, "scan-namespace", func(ctx context.Context, in Scope, frames *sidecar.Frames) error {
+		if in.Namespace == nil || *in.Namespace == "" {
+			return sidecar.InvalidParams("Choose one namespace before running a scan")
+		}
+		runner, err := getRunner(ctx)
+		if err != nil {
+			return err
+		}
+		return runner.Run(ctx, jobs.Scope{ClusterID: in.ClusterID, Namespace: *in.Namespace}, "", func(frame map[string]any) error { return frames.Send(frame) })
+	})
+	sidecar.Stream(s, "scan-image", func(ctx context.Context, in struct {
+		Scope
+		Image string `json:"image"`
+	}, frames *sidecar.Frames) error {
+		if in.Namespace == nil || *in.Namespace == "" || in.Image == "" {
+			return sidecar.InvalidParams("Choose a namespace and image before running a scan")
+		}
+		runner, err := getRunner(ctx)
+		if err != nil {
+			return err
+		}
+		return runner.Run(ctx, jobs.Scope{ClusterID: in.ClusterID, Namespace: *in.Namespace}, in.Image, func(frame map[string]any) error { return frames.Send(frame) })
 	})
 	return s
 }

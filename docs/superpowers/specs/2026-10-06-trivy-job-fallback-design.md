@@ -52,9 +52,11 @@ An old host that does not serve the callback refuses it; it never simulates a
 successful empty scan. Keep extension API 0.8/protocol 0.2 additions gated to
 the new callbacks and grant, preserving older reader packages.
 
-Create a uniquely named, suspended Job first. Its UID owns a dedicated ServiceAccount,
-Role and RoleBinding when namespace reading is required; start only after those
-resources exist. Whitelist non-secret resource names and get/list/watch verbs;
+Create a uniquely named Job with its active deadline immediately in force. A
+required, initially absent ConfigMap volume prevents its container starting
+before access is ready. Its UID owns a dedicated ServiceAccount, Role and
+RoleBinding when namespace reading is required; create the readiness ConfigMap
+last. This avoids a forever-suspended orphan if the host loses the create response. Whitelist non-secret resource names and get/list/watch verbs;
 no wildcard, Secrets, token creation, nodes/proxy, exec or write permissions.
 Manual image scans disable ServiceAccount token mounting and create no reader RBAC.
 

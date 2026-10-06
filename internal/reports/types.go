@@ -25,6 +25,8 @@ type Metadata struct {
 	ReportedAt        string         `json:"reportedAt,omitempty"`
 	Freshness         string         `json:"freshness"`
 	EngineVersion     string         `json:"engineVersion,omitempty"`
+	ScannerImage      string         `json:"scannerImage,omitempty"`
+	Coverage          []string       `json:"coverage,omitempty"`
 	ImageDigest       string         `json:"imageDigest,omitempty"`
 	Image             string         `json:"image,omitempty"`
 	Platform          string         `json:"platform,omitempty"`

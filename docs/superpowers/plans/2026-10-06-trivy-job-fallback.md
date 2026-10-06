@@ -60,7 +60,7 @@ capability/manifest schemas and catalog.
 metadata plus a bounded app-relative result file. Job binding arguments fix
 image/command/args/scalar inputs/RBAC; the spec fixes all host Pod/lifetime limits.
 
-- [ ] Write caller-payload and authorization tests, Job template/RBAC tests,
+- [ ] Write caller-payload and authorization tests, Job template/RBAC/readiness-volume tests,
   owner-UID/result-limit/failure/cancellation cleanup tests; observe failures.
 - [ ] Implement the smallest typed facade and broker/SDK callback, using existing
   resolver/grant checks and kube-rs. No new subprocess or local network surface.

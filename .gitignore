@@ -10,3 +10,4 @@ coverage.out
 .superpowers/
 .trivy/
 __pycache__/
+.host-job/

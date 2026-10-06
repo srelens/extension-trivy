@@ -84,12 +84,12 @@ func TestReportReadErrorsAreNotEmptyResults(t *testing.T) {
 	}
 }
 
-func TestSourceStatusDoesNotAdvertiseUnimplementedLocalScanning(t *testing.T) {
+func TestSourceStatusExplainsExplicitContainerScanning(t *testing.T) {
 	status, err := SourceStatus(context.Background(), &broker{states: map[string]string{}}, "cluster", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(status.Scope, "not available") {
+	if !strings.Contains(status.Scope, "Scan namespace") {
 		t.Fatalf("misleading local scan scope: %s", status.Scope)
 	}
 }

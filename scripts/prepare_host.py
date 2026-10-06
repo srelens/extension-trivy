@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 import subprocess
 
-HOST_REVISION = "b1f430b3d2ee1ce2d8a08bd323865861b6ef9d14"
+HOST_REVISION = "8a35f2be2b6399cbd875b8a8eab77e08ff94b3e0"
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -37,7 +37,7 @@ def prepare(source, target, revision=HOST_REVISION):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", default="https://github.com/srelens/srelens.git")
-    parser.add_argument("--target", type=Path, default=ROOT / ".host-v0.2")
+    parser.add_argument("--target", type=Path, default=ROOT / ".host-job")
     args = parser.parse_args()
     prepare(args.source, args.target)
     print(f"host source: {head(args.target)}")
