@@ -53,7 +53,13 @@ sandbox, without an MCP server. On `kind-srelens-demo`:
   256 MiB limit. Its CPU allowance remained 1 CPU.
 
 The production UI components were driven and inspected at wide and narrow
-widths in a browser harness with clearly identified fixture data. The native
+widths in a browser harness with clearly identified fixture data. Overview,
+Images and Reports were also driven with a captured response from the live
+sandbox test, explicitly labeled as a snapshot with live queries disabled.
+Host follow-up `635d9c1e9687d5e465e36fc64f67829a49aee3ba` keeps shared scalar
+metadata above the table rather than repeating the cluster ID in every row;
+two regression tests, operation route/navigation tests and typecheck pass.
+Differing row identities remain visible, including when filtering. The native
 webview did not complete the automated render check while the Mac was entering
 maintenance sleep; native window rendering is still unverified. Backend live
 acceptance and browser fixture inspection are separate evidence.
