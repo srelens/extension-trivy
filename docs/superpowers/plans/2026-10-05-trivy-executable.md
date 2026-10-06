@@ -10,6 +10,14 @@
 
 **Spec:** [Trivy design](../specs/2026-10-05-trivy-design.md). Read it before executing. Task 1 has a working feasibility prototype; [evidence](../../feasibility.md) records what passed and what blocks production work.
 
+**Current ruling, 2026-10-06:** The user authorized local macOS implementation
+and testing, executable packages up to 512 MiB, and a production-Trivy-only
+2 GiB data allowance. Native reader UI is confirmed by the user's M01 screenshot.
+Continue local OCI/scanner work under these allowances; historical Task 1
+limits and cross-platform release gates below do not override this approval.
+Production DB memory and cancellation still require measurement. Linux/Windows
+runtime acceptance and signed release/catalog publication remain separate gates.
+
 ## Global constraints
 
 - Trivy Operator must not be required to install, start or scan with this app.
@@ -17,7 +25,7 @@
 - Operator integration is in the first release: preserve source/category/subject/timestamp, avoid double-counting and redact exposed-secret matches from rendered, stored normalized and exported details.
 - TDD: failing behavioral test → observed failure → minimal implementation → passing test → Angular conventional commit. No co-author trailers; no PR or publication without a user request.
 - No subprocess, direct network, kubeconfig, Kubernetes Secret read, external scanner server or application HTML/JavaScript renderer.
-- Keep the host's 256 MiB memory, one CPU, 1 GiB data and 30-second ordinary request limits. Long scans use cancellable streams.
+- Keep the host's 256 MiB memory, one CPU and 30-second ordinary request limits. The user approved 2 GiB aggregate data for production `org.srelens.trivy` on 2026-10-06; other apps retain 1 GiB. Long scans use cancellable streams.
 - One active scan, at most 10 completed reports, findings pages of 1–100 rows, 512-byte image references and a visible stale-DB threshold of 24 hours.
 - Never claim a failed/incomplete/stale scan is clean. Pin cluster, namespace, app revision, image digest, target platform, engine version and DB digest.
 - Inspected host baseline: `d3fd0618239b91ec83aa354bea57beeea41c464a`. Trivy candidate: `591e9799316a602e703f0b484f6c6d7b234ec8f3`, with one documented fd-chmod patch. Linux arm64 fixture execution is verified; this is not complete app/platform compatibility.

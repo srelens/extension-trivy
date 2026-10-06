@@ -59,10 +59,12 @@ sandbox test, explicitly labeled as a snapshot with live queries disabled.
 Host follow-up `635d9c1e9687d5e465e36fc64f67829a49aee3ba` keeps shared scalar
 metadata above the table rather than repeating the cluster ID in every row;
 two regression tests, operation route/navigation tests and typecheck pass.
-Differing row identities remain visible, including when filtering. The native
-webview did not complete the automated render check while the Mac was entering
-maintenance sleep; native window rendering is still unverified. Backend live
-acceptance and browser fixture inspection are separate evidence.
+Differing row identities remain visible, including when filtering. The user's
+2026-10-06 native screenshot confirms Images renders on M01: namespace
+`ai-services`, Deployment `ollama-gpu`, regular container `ollama`, image
+`ollama/ollama:latest`. This confirms native rendering and inventory for that
+cluster; it does not establish Operator availability or successful image scans.
+Backend live acceptance and browser snapshot inspection remain separate evidence.
 
 Host verification passed `cargo test --workspace` (4,243 tests, 32 ignored),
 the complete frontend suite (7,767 tests in 448 files), typecheck, production
@@ -76,9 +78,9 @@ a real installed Operator has not yet been tested end to end.
 
 There is no scan operation in this reader package. Verified host OCI acquisition,
 production Trivy database loading, image scans and cancellation remain open.
-The measured database is 1,477,152,768 bytes unpacked and exceeds the current
-1 GiB private-data limit. A Trivy-specific 2 GiB allowance awaits the user's
-decision; global limits and the sandbox remain unchanged. Even with that
-allowance, acquisition must fit images, staging and reports within the budget,
+The measured database is 1,477,152,768 bytes unpacked. The user approved a
+Trivy-specific 2 GiB aggregate allowance on 2026-10-06; memory, CPU, other apps'
+data limits and sandbox isolation remain unchanged. Even with that allowance,
+acquisition must fit images, staging and reports within the budget,
 and actual scanner RAM/cancellation acceptance must pass. Windows execution,
 signed release and catalog publication are separate outstanding gates.

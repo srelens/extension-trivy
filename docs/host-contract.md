@@ -6,7 +6,7 @@ Status: partially implemented, 2026-10-06. Host commit `b1f430b3d2ee1ce2d8a08bd3
 
 The user authorized macOS executable apps and a 512 MiB package limit; host commit `ec264a683e8953eff190444938097a6ba5fac9be` contains that change. The APK inventory-truncation defect was fixed with a reproduced regression test in app commit `9ab8998`.
 
-The real production database is 1,477,152,768 bytes unpacked, which exceeds the unchanged 1 GiB data allowance. A Trivy-specific 2 GiB allowance is pending the user's decision. No global runtime limit or sandbox policy has been relaxed. Production database RSS, true in-flight cancellation, OCI transfer integrity/quotas and Windows AppContainer execution remain open. Fixture success is not live scan acceptance.
+The real production database is 1,477,152,768 bytes unpacked. On 2026-10-06 the user approved a 2 GiB aggregate data allowance for the production ID `org.srelens.trivy` only. Memory remains 256 MiB, CPU remains one core, other apps retain 1 GiB, and sandbox isolation remains required. Production database RSS, true in-flight cancellation, OCI transfer integrity/quotas and Windows AppContainer execution remain open. Fixture success is not live scan acceptance.
 
 ## Versions and authority
 
@@ -193,7 +193,7 @@ deduplicating CVEs across independent occurrences.
 Under the private app data root, store JSON report metadata and JSONL findings.
 Use atomic writes, retain the last 10 completed app reports, and bound reports,
 Operator cache, DB, image archives, temporary data and staging together to
-1 GiB. Failed/cancelled scans never replace a completed report. Operator CRs
+2 GiB for `org.srelens.trivy`. Failed/cancelled scans never replace a completed report. Operator CRs
 remain authoritative in the cluster; local normalized views are bounded cache.
 Never persist exposed-secret match text. Updates/restarts retain local reports;
 uninstall relies on the host's existing scoped-data pruning.
