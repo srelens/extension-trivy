@@ -93,3 +93,29 @@ func TestSourceStatusDoesNotAdvertiseUnimplementedLocalScanning(t *testing.T) {
 		t.Fatalf("misleading local scan scope: %s", status.Scope)
 	}
 }
+
+func TestAvailabilityPreservesOnlyKnownNamespaceScope(t *testing.T) {
+	// These are the host's wire payloads: absent/unknown have no scope;
+	// a served cluster-wide report explicitly carries false.
+	for _, raw := range []string{
+		`{"binding":"vulnerability-reports","state":"absent"}`,
+		`{"binding":"vulnerability-reports","state":"unknown","reason":"Forbidden"}`,
+		`{"binding":"cluster-vulnerability-reports","state":"served","version":"v1alpha1","namespaced":false}`,
+		`{"binding":"vulnerability-reports","state":"served","version":"v1alpha1","namespaced":true}`,
+	} {
+		var row BindingStatus
+		if err := json.Unmarshal([]byte(raw), &row); err != nil {
+			t.Fatal(err)
+		}
+		encoded, err := json.Marshal(row)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got, want map[string]any
+		json.Unmarshal(encoded, &got)
+		json.Unmarshal([]byte(raw), &want)
+		if got["namespaced"] != want["namespaced"] {
+			t.Fatalf("scope invented or lost for %s: %s", raw, encoded)
+		}
+	}
+}

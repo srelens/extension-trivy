@@ -21,7 +21,7 @@ type BindingStatus struct {
 	Binding    string `json:"binding"`
 	State      string `json:"state"`
 	Version    string `json:"version,omitempty"`
-	Namespaced bool   `json:"namespaced"`
+	Namespaced *bool  `json:"namespaced,omitempty"`
 	Reason     string `json:"reason,omitempty"`
 }
 type Status struct {
