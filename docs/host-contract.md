@@ -1,3 +1,5 @@
+> Fallback execution now follows [the in-cluster Job design](superpowers/specs/2026-10-06-trivy-job-fallback-design.md). Local OCI/scanner prerequisites below are historical; they no longer block the container approach.
+
 # Host contract for the Trivy app
 
 Status: partially implemented, 2026-10-06. Host commit `b1f430b3d2ee1ce2d8a08bd323865861b6ef9d14` implements the binding-availability callback, kind-bound workload reader and native operation/stream surfaces below. Workspace tests and live macOS reader acceptance pass; see [local reader evidence](local-readers.md). **OCI artifact acquisition is still a proposal**, not an available host method.

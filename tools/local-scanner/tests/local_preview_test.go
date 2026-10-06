@@ -26,7 +26,7 @@ func TestLocalPreviewFixtureOperation(t *testing.T) {
 			}
 			data := t.TempDir()
 			if populated {
-				if err := os.CopyFS(data, os.DirFS(filepath.Join("..", ".fixtures", "runtime"))); err != nil {
+				if err := os.CopyFS(data, os.DirFS(filepath.Join("..", "..", "..", ".fixtures", "runtime"))); err != nil {
 					t.Fatal(err)
 				}
 			}

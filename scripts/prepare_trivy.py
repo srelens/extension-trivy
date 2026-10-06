@@ -60,7 +60,7 @@ def prepare_source(source, target):
 
 
 def main():
-    downloaded = json.loads(subprocess.check_output(["go", "mod", "download", "-json", MODULE + "@" + VERSION], cwd=ROOT))
+    downloaded = json.loads(subprocess.check_output(["go", "mod", "download", "-json", MODULE + "@" + VERSION], cwd=ROOT / "tools/local-scanner"))
     if downloaded.get("Version") != VERSION or downloaded.get("Error"):
         raise ValueError("pinned Trivy source download failed")
     if downloaded.get("Sum") != MODULE_SUM:

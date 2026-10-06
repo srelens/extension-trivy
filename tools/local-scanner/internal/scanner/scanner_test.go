@@ -210,7 +210,7 @@ func TestScanArchiveRefusesOutsideAndSymlink(t *testing.T) {
 
 func fixture(t *testing.T) (string, string) {
 	t.Helper()
-	source := filepath.Join("..", "..", ".fixtures")
+	source := filepath.Join("..", "..", "..", "..", ".fixtures")
 	for file, digest := range map[string]string{
 		"alpine-39.tar":                "24e9cea338601b1ed9422f3a6e9bfe2235a45588d53c34f2c9606098bcf5b1a5",
 		"db-source/alpine.yaml":        "e8454df110f7d75d368e5b4d2c9581eb3ee5c6c3118fc698d6fd824ec2573a34",

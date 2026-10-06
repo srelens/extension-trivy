@@ -53,7 +53,7 @@ def main():
     subprocess.run(["docker", "image", "save", "--platform", "linux/amd64", "--output", str(raw), IMAGE], check=True)
     canonical_archive(raw, FIXTURES / "alpine-39.tar")
     raw.unlink()
-    module = json.loads(subprocess.check_output(["go", "list", "-m", "-json", "github.com/aquasecurity/trivy"], cwd=ROOT))
+    module = json.loads(subprocess.check_output(["go", "list", "-m", "-json", "github.com/aquasecurity/trivy"], cwd=ROOT / "tools/local-scanner"))
     if module["Version"] != "v0.75.0":
         raise ValueError("fixture preparation requires pinned Trivy v0.75.0")
     source = Path(module["Dir"]) / "integration/testdata/fixtures/db"
@@ -63,7 +63,7 @@ def main():
         if hashlib.sha256((source / name).read_bytes()).hexdigest() != digest:
             raise ValueError(f"{name}: upstream fixture digest mismatch")
         shutil.copyfile(source / name, destination / name)
-    subprocess.run(["go", "run", "./cmd/prepare-db", str(FIXTURES)], cwd=ROOT, check=True)
+    subprocess.run(["go", "run", "./cmd/prepare-db", str(FIXTURES)], cwd=ROOT / "tools/local-scanner", check=True)
     shutil.copyfile(FIXTURES / "alpine-39.tar", FIXTURES / "runtime/image.tar")
     debian = Path(module["Dir"]) / "pkg/fanal/test/testdata/vuln-image.tar.gz"
     if hashlib.sha256(debian.read_bytes()).hexdigest() != "60d91170eedb6f4af94899684b500338a84f10d643f2761e6a4821959d0c9e3a":

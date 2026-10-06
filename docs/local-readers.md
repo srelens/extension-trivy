@@ -1,3 +1,5 @@
+> Fallback execution now follows [the in-cluster Job design](superpowers/specs/2026-10-06-trivy-job-fallback-design.md). Local OCI/scanner prerequisites below are historical; they no longer block the container approach.
+
 # Local reader testing
 
 This is a development reader build, not the completed Trivy scanning app.
