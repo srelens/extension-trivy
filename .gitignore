@@ -1,4 +1,5 @@
 .host/
+.host-v0.2/
 dist/
 bin/
 .screenshots/

@@ -172,7 +172,13 @@ review clear Task 1.
 
 ## Reproduce the development proof
 
-From the app checkout, prepare exact dependencies before Go commands:
+This section describes the historical scanner fixture proof against host
+`d3fd0618239b91ec83aa354bea57beeea41c464a` in `.host`; it does not establish
+scanner acceptance against the newer reader host. Current reader dependencies
+are prepared in `.host-v0.2` by `prepare_host.py`. See
+[local reader testing](local-readers.md) for that build and its exact host pin.
+
+From the app checkout, prepare current exact dependencies before Go commands:
 
 ```sh
 python3 scripts/prepare_host.py
@@ -186,6 +192,8 @@ CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags='-s -w' \
   -o .superpowers/trivy-probe-windows.exe ./cmd/trivy-probe
 ```
 
+The following Linux commands require the preserved historical `.host` checkout
+and reproduce that proof, not current reader or production scanner acceptance.
 For a Linux cgroup-v2 container with delegation (use the artifact matching its
 CPU), mount this checkout as `/work`, set `CARGO_TARGET_DIR` and `CARGO_HOME`
 under `/work/.superpowers`, and run:

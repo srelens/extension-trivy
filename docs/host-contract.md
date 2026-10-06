@@ -1,35 +1,17 @@
 # Host contract for the Trivy app
 
-Status: proposal, 2026-10-05. No production host methods below have been added.
-Inspected host production source: `d3fd0618239b91ec83aa354bea57beeea41c464a`.
-The feasibility probe uses only the existing sidecar protocol 0.1.0.
+Status: partially implemented, 2026-10-06. Host commit `b1f430b3d2ee1ce2d8a08bd323865861b6ef9d14` implements the binding-availability callback, kind-bound workload reader and native operation/stream surfaces below. Workspace tests and live macOS reader acceptance pass; see [local reader evidence](local-readers.md). **OCI artifact acquisition is still a proposal**, not an available host method.
 
 ## Blocking prerequisites
 
-The pinned host limits a native package to 16 MiB compressed and 64 MiB total
-unpacked files. The stripped Linux probe alone is 146,997,408 bytes. Its gzip
-is 41,970,263 bytes. The actual native digest-list builder refuses that binary.
-The Windows build alone is 162,655,232 bytes. Runtime memory fits the small
-Linux fixtures, but the current package format cannot distribute this adapter.
+The user authorized macOS executable apps and a 512 MiB package limit; host commit `ec264a683e8953eff190444938097a6ba5fac9be` contains that change. The APK inventory-truncation defect was fixed with a reproduced regression test in app commit `9ab8998`.
 
-Do not raise these global limits or change sandbox limits to pass the proof.
-Before production work, review an integration that fits the package format or
-an explicit platform design for distributing large, signed executable assets.
-Such a design must preserve existing declarative-package limits, bound every
-download/unpack, verify publisher signatures and file digests before execution,
-and recheck binaries on every restart. It is not implemented or approved here.
-
-Real Windows AppContainer execution also remains required. A cross-build is
-recorded only as a build result, never as sandbox acceptance.
-The candidate also has a reproduced APK inventory-truncation defect, and the
-current cancellation check proves early cancellation only. The unresolved
-[feasibility gates](feasibility.md) must clear before these proposals are
-implemented. None of the contracts below have been finalized or approved.
+The real production database is 1,477,152,768 bytes unpacked, which exceeds the unchanged 1 GiB data allowance. A Trivy-specific 2 GiB allowance is pending the user's decision. No global runtime limit or sandbox policy has been relaxed. Production database RSS, true in-flight cancellation, OCI transfer integrity/quotas and Windows AppContainer execution remain open. Fixture success is not live scan acceptance.
 
 ## Versions and authority
 
-The proposed additions need extension API 0.8 and a new sidecar protocol line,
-proposed 0.2.0, while this baseline is current. Retain 0.1.0 for old sidecars.
+The implemented additions use extension API 0.8 and sidecar protocol 0.2.0.
+Protocol 0.1.0 remains supported for old sidecars.
 New callbacks require negotiated 0.2.0; an old host is incompatible, not an
 absent Operator. If 1.0 lands independently, follow its additive-version rules.
 
@@ -45,13 +27,13 @@ snake_case spellings; regenerate protocol/schema/Go types together.
 
 ## Binding availability
 
-Proposed native capability: `extensions.bindingAvailability`:
+Implemented native capability: `extensions.bindingAvailability`:
 
 ```json
 {"id":"org.srelens.trivy","revision":7,"context":"cluster-a","namespace":"team-a","bindings":["vulnerability-reports","cluster-vulnerability-reports"]}
 ```
 
-Proposed sidecar callback: `host/bindingAvailability`:
+Implemented sidecar callback: `host/bindingAvailability`:
 
 ```json
 {"context":{"clusterId":"cluster-a","namespace":"team-a"},"bindings":["vulnerability-reports","cluster-vulnerability-reports"]}
@@ -78,7 +60,7 @@ Empty report lists mean no reports yet, not a missing Operator.
 
 ## Workload images
 
-Proposed read-only, app-grantable capability: `k8s.listWorkloadImages`.
+Implemented read-only, app-grantable capability: `k8s.listWorkloadImages`.
 Each binding fixes `kind` to Deployment, StatefulSet or DaemonSet. The caller
 supplies existing `context` and optional `namespace` inputs; it cannot change
 kind or request a manifest. Return a bounded list of workload identities:
@@ -162,12 +144,12 @@ The prototype expects them in `db/`; revisioned cache selection is later work.
 
 ## Native operation pages and stream bridge
 
-Add generic native operation pages to the manifest, with declared operation,
+The host supports generic native operation pages in the manifest, with declared operation,
 scalar form inputs and host-rendered table/result fields. No app HTML,
 JavaScript, iframe or special Trivy component belongs in the package.
 The parser, schemas, native UI and Go types must agree on the new fields.
 
-Extend the existing app-stream source union with a proposed source:
+The app-stream source union now accepts an operation source:
 
 ```json
 {"kind":"operation","method":"scan","params":{"clusterId":"cluster-a","namespace":"team-a","image":"ghcr.io/example/web:v1","platform":"linux/amd64"}}
@@ -178,10 +160,11 @@ The existing native stream owner fields (`id`, `revision`, `view`, `channel`,
 against that context. The stream remains cancellable and checked through app
 lifecycle changes. It is not an ordinary request held beyond 30 seconds.
 
-Suggested page route identity:
-`/extension-operation/<id>/<revision>/<clusterId>/<pageId>`, with every segment
-encoded. Report tabs additionally carry `reportId`. Register the screen and an
-actual opener. Cluster switching must not remount/re-pin an existing tab.
+Implemented route identity:
+`/extension-operation-contexts/<clusterId>/<id>/<revision>/<operation>`, with every segment
+encoded. Report tabs additionally carry encoded scalar parameters including
+`reportId`. The screen and sidebar opener are registered. Cluster switching
+must not remount/re-pin an existing tab.
 
 Existing wire lifecycle uses `stream/open`, `stream/data`, `stream/error`,
 `stream/close`, and host `stream/cancel`. Normal scan data has discriminated
@@ -193,7 +176,8 @@ totals. The UI retains cancellation as a separate local state after cancelling.
 
 ## Production app operations and storage
 
-These are proposed app methods; the fixture-only probe is not their implementation:
+The reader build implements four ordinary app methods. The scan stream remains
+proposed; the fixture-only probe is not its implementation:
 
 - `source-status {clusterId, namespace?}`
 - `list-images {clusterId, namespace?}`

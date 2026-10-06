@@ -6,14 +6,17 @@ Planned executable reference app for [srelens/srelens#521](https://github.com/sr
 
 ## Current status
 
-Implementation has started with an offline scanner and executable feasibility probe. The probe scans real pinned image/DB fixtures in process and speaks the Go SDK's JSON-RPC protocol. A signed [local macOS preview](local-preview/README.md) has been installed and invoked inside the srelens desktop host. It is not a production app or release.
+The current development build has native Overview, Images, Reports and Findings screens, broker-backed workload discovery, all twelve Trivy Operator report readers and bounded private report storage. It selects Operator reports when served and preserves discovery/read errors. Reports retain source, age, cluster, namespace and resource identity; exposed-secret match values are redacted.
 
-The feasibility gate remains open: Windows AppContainer execution needs a runner, and review found an incomplete APK inventory case plus missing in-flight cancellation evidence. The original package-size blocker is cleared for the local preview by host commit `ec264a683e8953eff190444938097a6ba5fac9be`, which enables macOS execution and 512 MiB package limits. The prototype is for the pinned fixtures only. Production host APIs, Operator integration, persistent reports and dashboard screens remain pending. The host also needs generic binding-availability, artifact-transfer and executable-result surfaces, plus a reader that exposes workload images.
+**Live app image scanning is not implemented yet.** The in-process scanner has passed pinned offline-fixture checks, but production OCI acquisition, in-flight cancellation and production database memory acceptance remain open. The measured current database is 1,477,152,768 bytes unpacked (1.38 GiB), exceeding the host's 1 GiB app-data budget before image layers or report storage. A Trivy-specific 2 GiB allowance is awaiting the user's decision; global limits have not changed.
+
+The local reader build uses extension API 0.8 and sidecar protocol 0.2.0 from host commit `b1f430b3d2ee1ce2d8a08bd323865861b6ef9d14`. The signed macOS reader package passed real workload discovery through the production registry and OS sandbox without MCP. The original signed fixture preview remains separate. Windows AppContainer execution and release/catalog acceptance are still pending. No package has been published.
 
 - [Design](docs/superpowers/specs/2026-10-05-trivy-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-05-trivy-executable.md)
 - [Feasibility evidence and reproduction](docs/feasibility.md)
-- [Proposed host contract](docs/host-contract.md)
+- [Local reader testing and acceptance](docs/local-readers.md)
+- [Host contract and proposed scanning additions](docs/host-contract.md)
 - [Contributor rules](AGENTS.md)
 
 The first milestone requires real Linux and Windows sandbox execution and an installable native package. It must fit the host's resource and package limits before production implementation proceeds. Prepare the pinned host SDK and checksum-guarded Trivy compatibility source as described in the feasibility document before running Go commands.
@@ -28,6 +31,6 @@ The first milestone requires real Linux and Windows sandbox execution and an ins
 - Keep reports and the vulnerability database only in the app's scoped data directory.
 - Ship a signed `.srelens-extension` package with per-platform binaries and the official Trivy logo.
 
-Linux and Windows are the initial execution targets. macOS follows the host's sandbox validation gate; the web host currently refuses executable apps. Private-registry fallback scans are later work. Operator integration is part of the first release, while Operator installation remains optional.
+Linux and Windows are the initial scanner execution targets. The current macOS reader package has passed a supervisor/sandbox test; production scanning has its own acceptance gates. The web host currently refuses executable apps. Private-registry fallback scans are later work. Operator integration is part of the first release, while Operator installation remains optional.
 
 Development uses TDD, Angular conventional commits, and no co-author trailers. Creating a GitHub repository, opening a PR and publishing releases are separate follow-up actions.
