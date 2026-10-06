@@ -78,7 +78,7 @@ func (r *Runner) Run(ctx context.Context, scope Scope, image string, send func(m
 		}
 		switch {
 		case vuln == "served" && config == "served":
-			rows, e := operator.ListReports(ctx, r.Broker, scope.ClusterID, &scope.Namespace)
+			rows, warnings, e := operator.ListReportInventory(ctx, r.Broker, scope.ClusterID, &scope.Namespace)
 			if e != nil {
 				return e
 			}
@@ -86,7 +86,7 @@ func (r *Runner) Run(ctx context.Context, scope Scope, image string, send func(m
 			for _, row := range rows {
 				items = append(items, map[string]any{"reportId": row.ID, "source": row.Source, "category": row.Category, "namespace": row.Namespace, "subject": row.Subject.Name, "findings": row.FindingCount})
 			}
-			return send(map[string]any{"state": "completed", "source": "operator", "namespace": scope.Namespace, "message": "Using published Operator reports. An empty list means no reports have been published, not a clean namespace.", "items": items})
+			return send(map[string]any{"state": "completed", "source": "operator", "namespace": scope.Namespace, "warnings": warnings, "message": "Using published Operator reports. An empty list means no reports have been published, not a clean namespace.", "items": items})
 		case vuln == "served":
 			binding = "namespace-config-job"
 		case config == "served":
@@ -103,8 +103,8 @@ func (r *Runner) Run(ctx context.Context, scope Scope, image string, send func(m
 		return fmt.Errorf("Container scan failed: %w", e)
 	}
 	var result struct {
-		Path, Job, UID, Namespace, Image, FinishedAt string
-		Bytes                                        int
+		Path, Job, UID, Namespace, Image, FinishedAt, State, Error string
+		Bytes                                                      int
 	}
 	if json.Unmarshal(raw, &result) != nil || !resultPath.MatchString(result.Path) || result.Namespace != scope.Namespace || result.Job == "" || result.UID == "" || result.Bytes < 1 || result.Bytes > MaxBytes {
 		return fmt.Errorf("Host returned invalid scan result metadata")
@@ -123,6 +123,9 @@ func (r *Runner) Run(ctx context.Context, scope Scope, image string, send func(m
 	file.Close()
 	if e != nil || len(data) != result.Bytes {
 		return fmt.Errorf("Scan result is unreadable, truncated or oversized; no report saved")
+	}
+	if result.State == "failed" {
+		return fmt.Errorf("Container scan failed: %s", ScanFailure(string(data), result.Error))
 	}
 	if err = ctx.Err(); err != nil {
 		return err

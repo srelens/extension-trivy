@@ -16,6 +16,7 @@ import (
 )
 
 type fakeBroker struct {
+	failed       bool
 	states       map[string]string
 	dir, binding string
 	calls        int
@@ -53,13 +54,15 @@ func (b *fakeBroker) RunJob(ctx context.Context, cc sidecar.CallContext, name st
 	}
 	path := "job-result-0123456789abcdef0123456789abcdef.json"
 	raw := `{"Resources":[]}`
-	if name == "image-job" {
+	if b.failed {
+		raw = "FATAL image scan: UNAUTHORIZED token=private-value"
+	} else if name == "image-job" {
 		raw = imageJSON
 	}
 	if err := os.WriteFile(filepath.Join(b.dir, path), []byte(raw), 0600); err != nil {
 		return nil, err
 	}
-	return json.Marshal(map[string]any{"path": path, "job": "scanner", "uid": "uid", "namespace": "team", "image": "pinned", "bytes": len(raw), "finishedAt": "2026-10-06T12:00:00Z"})
+	return json.Marshal(map[string]any{"path": path, "job": "scanner", "uid": "uid", "namespace": "team", "image": "pinned", "bytes": len(raw), "finishedAt": "2026-10-06T12:00:00Z", "state": map[bool]string{true: "failed", false: "completed"}[b.failed], "error": "Container exited with code 1"})
 }
 func TestNamespaceScanSelectsOnlyMissingOperatorCategories(t *testing.T) {
 	for _, c := range []struct{ vuln, config, binding string }{{"absent", "absent", "namespace-job"}, {"served", "absent", "namespace-config-job"}, {"absent", "served", "namespace-vulnerability-job"}, {"served", "served", ""}, {"unknown", "absent", "error"}} {
@@ -122,5 +125,24 @@ func TestScanCancellationAndSingleActiveRunLeavePriorReports(t *testing.T) {
 	}
 	if err := r.Run(context.Background(), Scope{"cluster", ""}, "alpine", func(map[string]any) error { return nil }); err == nil {
 		t.Fatal("all namespace scan accepted")
+	}
+}
+
+func TestFailedJobDiagnosticsAreActionableAndNeverSaved(t *testing.T) {
+	dir := t.TempDir()
+	store, _ := reports.NewStore(dir, 1<<30)
+	b := &fakeBroker{dir: dir, failed: true}
+	r := Runner{Broker: b, Store: store, Dir: dir}
+	err := r.Run(context.Background(), Scope{"cluster", "team"}, "private/image", func(map[string]any) error { return nil })
+	if err == nil || !strings.Contains(err.Error(), "Registry access denied") || strings.Contains(err.Error(), "private-value") {
+		t.Fatal(err)
+	}
+	rows, _ := store.List(context.Background(), "cluster", nil, "app")
+	if len(rows) != 0 {
+		t.Fatal("failed scan saved")
+	}
+	matches, _ := filepath.Glob(filepath.Join(dir, "job-result-*"))
+	if len(matches) != 0 {
+		t.Fatal("diagnostic retained")
 	}
 }

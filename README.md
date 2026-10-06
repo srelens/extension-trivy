@@ -10,12 +10,13 @@ The current development build has native Overview, Images, Reports and Findings 
 
 **In-cluster Job scanning is implemented with explicit Scan namespace and Scan image operations.** The user selected this fallback on 2026-10-06, superseding the local in-process scanner and OCI acquisition plan. Normal controller packages now use only the SDK and Go standard library. The previous scanner prototype is preserved as an optional nested module in `tools/local-scanner`; it is excluded from normal builds/tests. Local scanner/database storage is no longer required, so the Trivy-only data exception was removed in favor of the ordinary 1 GiB limit.
 
-The container-scan controller uses extension API 0.8 and sidecar protocol 0.2.0 from host commit `8a35f2be2b6399cbd875b8a8eab77e08ff94b3e0`. The signed macOS reader package passed real workload discovery through the production registry and OS sandbox without MCP. The original signed fixture preview remains separate. Windows AppContainer execution and release/catalog acceptance are still pending. No package has been published.
+The container-scan controller uses extension API 0.8 and sidecar protocol 0.2.0 from host commit `442d0fc4b56a4f82a6dca0815cdc077eee0e3284`. The signed macOS controller passed real namespace/image scans, registry failure and cancellation through the production registry and OS sandbox. The test namespace produced 17 findings and the image one critical vulnerability. Workload discovery passed through the production registry and OS sandbox without MCP. The original signed fixture preview remains separate. Windows AppContainer execution and release/catalog acceptance are still pending. No package has been published.
 
 - [Current design](docs/superpowers/specs/2026-10-06-trivy-job-fallback-design.md)
 - [Current implementation plan](docs/superpowers/plans/2026-10-06-trivy-job-fallback.md)
 - [Feasibility evidence and reproduction](docs/feasibility.md)
-- [Local reader testing and acceptance](docs/local-readers.md)
+- [Container scan acceptance](docs/local-container-scans.md)
+- [Historical reader testing and acceptance](docs/local-readers.md)
 - [Host contract and proposed scanning additions](docs/host-contract.md)
 - [Contributor rules](AGENTS.md)
 

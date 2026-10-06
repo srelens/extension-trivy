@@ -9,6 +9,7 @@ import (
 	"github.com/srelens/extension-trivy/internal/reports"
 	"github.com/srelens/srelens/sdk/go/sidecar"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -92,93 +93,121 @@ func identity(cluster, kind, namespace, name, uid, revision string) string {
 // ListReports fetches narrow metadata columns, leaving SBOM and other large
 // finding payloads for a selected report. No registry or database calls occur.
 func ListReports(ctx context.Context, b Broker, cluster string, namespace *string) ([]reports.Metadata, error) {
-	status, err := SourceStatus(ctx, b, cluster, namespace)
+	rows, warnings, err := ListReportInventory(ctx, b, cluster, namespace)
 	if err != nil {
 		return nil, err
 	}
+	if len(warnings) > 0 {
+		return nil, fmt.Errorf("Operator reports unavailable: %s", strings.Join(warnings, "; "))
+	}
+	return rows, nil
+}
+
+// ListReportInventory keeps readable categories alongside explicit failures.
+func ListReportInventory(ctx context.Context, b Broker, cluster string, namespace *string) ([]reports.Metadata, []string, error) {
+	if _, err := sidecar.NewCallContext(cluster, namespace); err != nil {
+		return nil, nil, err
+	}
+	status, err := SourceStatus(ctx, b, cluster, namespace)
+	if err != nil {
+		return []reports.Metadata{}, []string{err.Error()}, nil
+	}
 	out := []reports.Metadata{}
+	warnings := []string{}
 	for _, availability := range status.Bindings {
 		if availability.State == "absent" {
 			continue
 		}
 		if availability.State == "unknown" {
-			return nil, fmt.Errorf("%s discovery failed: %s", availability.Binding, availability.Reason)
+			warnings = append(warnings, fmt.Sprintf("%s discovery failed: %s", availability.Binding, availability.Reason))
+			continue
 		}
-		var kind Kind
-		for _, candidate := range Kinds {
-			if candidate.Binding == availability.Binding {
-				kind = candidate
-				break
-			}
-		}
-		ns := namespace
-		if !kind.Namespaced {
-			ns = nil
-		}
-		cc, err := sidecar.NewCallContext(cluster, ns)
+		rows, err := readReportList(ctx, b, cluster, namespace, availability.Binding)
 		if err != nil {
-			return nil, err
+			warnings = append(warnings, err.Error())
+			continue
 		}
-		raw, err := b.Read(ctx, cc, kind.Binding)
-		if err != nil {
-			return nil, fmt.Errorf("reading %s: %w", kind.Binding, err)
+		out = append(out, rows...)
+	}
+	return out, warnings, nil
+}
+func readReportList(ctx context.Context, b Broker, cluster string, namespace *string, binding string) ([]reports.Metadata, error) {
+	out := []reports.Metadata{}
+
+	var kind Kind
+	for _, candidate := range Kinds {
+		if candidate.Binding == binding {
+			kind = candidate
+			break
 		}
-		var list struct {
-			Items []struct {
-				Name, Namespace string
-				Columns         []string
-			}
-			Truncated bool
+	}
+	ns := namespace
+	if !kind.Namespaced {
+		ns = nil
+	}
+	cc, err := sidecar.NewCallContext(cluster, ns)
+	if err != nil {
+		return nil, err
+	}
+	raw, err := b.Read(ctx, cc, kind.Binding)
+	if err != nil {
+		return nil, fmt.Errorf("reading %s: %w", kind.Binding, err)
+	}
+	var list struct {
+		Items []struct {
+			Name, Namespace string
+			Columns         []string
 		}
-		if len(raw) > 4*1024*1024 || json.Unmarshal(raw, &list) != nil || list.Items == nil || list.Truncated {
-			return nil, fmt.Errorf("%s returned an invalid or truncated list; narrow the namespace", kind.Binding)
+		Truncated bool
+	}
+	if len(raw) > 4*1024*1024 || json.Unmarshal(raw, &list) != nil || list.Items == nil || list.Truncated {
+		return nil, fmt.Errorf("%s returned an invalid or truncated list; narrow the namespace", kind.Binding)
+	}
+	for _, row := range list.Items {
+		if len(row.Columns) != 11 || row.Name == "" || row.Columns[0] == "" || row.Columns[0] == "-" || row.Columns[1] == "" || row.Columns[1] == "-" {
+			return nil, fmt.Errorf("%s returned incomplete report metadata", kind.Binding)
 		}
-		for _, row := range list.Items {
-			if len(row.Columns) != 11 || row.Name == "" || row.Columns[0] == "" || row.Columns[0] == "-" || row.Columns[1] == "" || row.Columns[1] == "-" {
-				return nil, fmt.Errorf("%s returned incomplete report metadata", kind.Binding)
+		c := row.Columns
+		meta := reports.Metadata{ID: identity(cluster, kind.Name, row.Namespace, row.Name, c[0], c[1]), Source: "operator", State: "available", Category: kind.Category, ClusterID: cluster, Namespace: row.Namespace, Binding: kind.Binding, ResourceName: row.Name, ResourceUID: c[0], ResourceVersion: c[1], Subject: reports.Subject{Kind: kind.Name, Name: row.Name, Namespace: row.Namespace}, Freshness: "unknown", FindingCount: -1}
+		text := func(v string) string {
+			if v == "-" || v == "<none>" {
+				return ""
 			}
-			c := row.Columns
-			meta := reports.Metadata{ID: identity(cluster, kind.Name, row.Namespace, row.Name, c[0], c[1]), Source: "operator", State: "available", Category: kind.Category, ClusterID: cluster, Namespace: row.Namespace, Binding: kind.Binding, ResourceName: row.Name, ResourceUID: c[0], ResourceVersion: c[1], Subject: reports.Subject{Kind: kind.Name, Name: row.Name, Namespace: row.Namespace}, Freshness: "unknown", FindingCount: -1}
-			text := func(v string) string {
-				if v == "-" || v == "<none>" {
-					return ""
-				}
-				return v
-			}
-			meta.ReportedAt = text(c[2])
-			meta.EngineVersion = text(c[3])
-			meta.Image = text(c[4])
-			meta.ImageDigest = text(c[5])
-			if timestamp, err := time.Parse(time.RFC3339, meta.ReportedAt); err == nil {
-				age := time.Since(timestamp)
-				if age >= -5*time.Minute {
-					meta.Freshness = "current"
-					if age > 24*time.Hour {
-						meta.Freshness = "stale"
-					}
+			return v
+		}
+		meta.ReportedAt = text(c[2])
+		meta.EngineVersion = text(c[3])
+		meta.Image = text(c[4])
+		meta.ImageDigest = text(c[5])
+		if timestamp, err := time.Parse(time.RFC3339, meta.ReportedAt); err == nil {
+			age := time.Since(timestamp)
+			if age >= -5*time.Minute {
+				meta.Freshness = "current"
+				if age > 24*time.Hour {
+					meta.Freshness = "stale"
 				}
 			}
-			if kind.Category == "vulnerabilities" || kind.Category == "exposed-secrets" {
-				meta.Summary = map[string]int{}
-				total := 0
-				complete := true
-				for i, key := range []string{"criticalCount", "highCount", "mediumCount", "lowCount", "unknownCount"} {
-					value, err := strconv.Atoi(c[6+i])
-					if err != nil || value < 0 {
-						complete = false
-						continue
-					}
-					meta.Summary[key] = value
-					total += value
+		}
+		if kind.Category == "vulnerabilities" || kind.Category == "exposed-secrets" {
+			meta.Summary = map[string]int{}
+			total := 0
+			complete := true
+			for i, key := range []string{"criticalCount", "highCount", "mediumCount", "lowCount", "unknownCount"} {
+				value, err := strconv.Atoi(c[6+i])
+				if err != nil || value < 0 {
+					complete = false
+					continue
 				}
-				if complete {
-					meta.FindingCount = total
-				}
+				meta.Summary[key] = value
+				total += value
 			}
-			out = append(out, meta)
-			if len(out) > 1000 {
-				return nil, fmt.Errorf("more than 1,000 Operator reports; narrow the namespace")
+			if complete {
+				meta.FindingCount = total
 			}
+		}
+		out = append(out, meta)
+		if len(out) > 1000 {
+			return nil, fmt.Errorf("more than 1,000 Operator reports; narrow the namespace")
 		}
 	}
 	return out, nil

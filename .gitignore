@@ -11,3 +11,4 @@ coverage.out
 .trivy/
 __pycache__/
 .host-job/
+.host-job-*/

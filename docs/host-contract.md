@@ -208,3 +208,6 @@ cross-context operations/routes, OCI digest/redirect/path/budget failures,
 cancellation, bounded frames/cursors, old clients, and lifecycle revocation.
 No claim of implemented or tested production support exists until those tests
 and the outstanding feasibility gates pass.
+
+
+The local OCI-acquisition proposal in this document is historical. The implemented production fallback is the [scoped container Job design](superpowers/specs/2026-10-06-trivy-job-fallback-design.md); the controller does not download a local scanner, database or images.

@@ -42,11 +42,11 @@ host `crates/registry/src/extensions/sidecars.rs`.
 SDK and standard library. Optional local feasibility tools live in a nested
 module with their original fixture/source pins.
 
-- [ ] Add a failing dependency test and change the quota test to expect defaults
+- [x] Add a failing dependency test and change the quota test to expect defaults
   for production Trivy; run and observe both failures.
-- [ ] Move optional scanner/probe tools/tests into the separate module, adjust
+- [x] Move optional scanner/probe tools/tests into the separate module, adjust
   fixture/preparation paths, tidy production dependencies, remove the quota exception.
-- [ ] Verify production Go race tests, Python manifest/preparation tests and the
+- [x] Verify production Go race tests, Python manifest/preparation tests and the
   CI-style host quota test; commit `refactor(trivy): run scans in the cluster`.
 
 ## Task 2: Add the generic scoped Job runner
@@ -60,13 +60,13 @@ capability/manifest schemas and catalog.
 metadata plus a bounded app-relative result file. Job binding arguments fix
 image/command/args/scalar inputs/RBAC; the spec fixes all host Pod/lifetime limits.
 
-- [ ] Write caller-payload and authorization tests, Job template/RBAC/readiness-volume tests,
+- [x] Write caller-payload and authorization tests, Job template/RBAC/readiness-volume tests,
   owner-UID/result-limit/failure/cancellation cleanup tests; observe failures.
-- [ ] Implement the smallest typed facade and broker/SDK callback, using existing
+- [x] Implement the smallest typed facade and broker/SDK callback, using existing
   resolver/grant checks and kube-rs. No new subprocess or local network surface.
-- [ ] Regenerate schemas/catalog/Go types; verify protocol conformance, SDK race
+- [x] Regenerate schemas/catalog/Go types; verify protocol conformance, SDK race
   tests, registry/desktop combined tests and Rust workspace checks.
-- [ ] Commit `feat(extensions): run scoped app Jobs` and record the exact SDK pin.
+- [x] Commit `feat(extensions): run scoped app Jobs` and record the exact SDK pin.
 
 ## Task 3: Normalize container reports and add scan streams
 
@@ -77,14 +77,14 @@ image/command/args/scalar inputs/RBAC; the spec fixes all host Pod/lifetime limi
 `ScanImage(ctx, broker, scope, image)` call the Job binding; JSON parsers return
 existing report Metadata/Findings. Streams expose phase and bounded terminal IDs.
 
-- [ ] Add failing namespace/image JSON normalization tests, missing/error/partial
+- [x] Add failing namespace/image JSON normalization tests, missing/error/partial
   report refusal, source/severity/fixed-version/occurrence/secret-redaction tests,
   one-active-scan/cancellation and Operator preference tests; observe failures.
-- [ ] Implement standard-library parsers and SDK Job calls, preserve prior reports,
+- [x] Implement standard-library parsers and SDK Job calls, preserve prior reports,
   register two stream operations and honest source/coverage text.
-- [ ] Add scoped immutable Job bindings and official scanner image digest;
+- [x] Add scoped immutable Job bindings and official scanner image digest;
   validate the manifest using the real host parser. Pin the tested host SDK.
-- [ ] Run Go race/Python/package tests; commit `feat(trivy): collect in-cluster scans`.
+- [x] Run Go race/Python/package tests; commit `feat(trivy): collect in-cluster scans`.
 
 ## Task 4: Connect native scan actions and live acceptance
 
@@ -93,12 +93,12 @@ notes, signed local package staging outside git.
 **Interfaces:** Image row -> pinned scan-image route with image/namespace;
 Overview -> scan-namespace; user runs explicitly, cancels from the native page.
 
-- [ ] Write failing route/action/progress/cancel/failure tests; observe failures.
-- [ ] Allow generic row actions to open stream pages, show prefilled parameters,
+- [x] Write failing route/action/progress/cancel/failure tests; observe failures.
+- [x] Allow generic row actions to open stream pages, show prefilled parameters,
   and inspect wide/narrow native components with bounded report data.
-- [ ] Run real known-vulnerable namespace/image Jobs in kind without Operator;
+- [x] Run real known-vulnerable namespace/image Jobs in kind without Operator;
   confirm results, resource bounds, cancellation and owned-resource cleanup.
-- [ ] Run required suites/builds and one final whole-branch review; fix important
+- [x] Run required suites/builds and one final whole-branch review; fix important
   findings with TDD, sign/install the small controller locally and verify it.
 - [ ] Commit Angular changes, fast-forward the authorized local checkouts, leave
   Srelens running. Remote repository, release and catalog remain unrequested.

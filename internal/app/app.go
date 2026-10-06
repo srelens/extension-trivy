@@ -56,27 +56,27 @@ func New() *sidecar.Sidecar {
 		}
 		return map[string]any{"clusterId": in.ClusterID, "source": "workload templates", "scope": "Deployments, StatefulSets and DaemonSets; regular and init containers", "items": rows}, nil
 	})
-	allReports := func(ctx context.Context, in Scope) ([]reports.Metadata, error) {
-		rows, err := operator.ListReports(ctx, sidecar.HostFrom(ctx), in.ClusterID, in.Namespace)
+	allReports := func(ctx context.Context, in Scope) ([]reports.Metadata, []string, error) {
+		rows, warnings, err := operator.ListReportInventory(ctx, sidecar.HostFrom(ctx), in.ClusterID, in.Namespace)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		store, err := getStore(ctx)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		cached, err := store.List(ctx, in.ClusterID, in.Namespace, "app")
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		return append(rows, cached...), nil
+		return append(rows, cached...), warnings, nil
 	}
 	sidecar.Operation(s, "list-reports", func(ctx context.Context, in listInput) (map[string]any, error) {
 		limit, err := pageSize(in.Limit)
 		if err != nil {
 			return nil, sidecar.InvalidParams(err.Error())
 		}
-		rows, err := allReports(ctx, in.Scope)
+		rows, warnings, err := allReports(ctx, in.Scope)
 		if err != nil {
 			return nil, err
 		}
@@ -112,7 +112,7 @@ func New() *sidecar.Sidecar {
 			}
 			items = append(items, map[string]any{"reportId": row.ID, "source": row.Source, "category": row.Category, "namespace": row.Namespace, "subject": row.Subject.Name, "image": row.Image, "imageDigest": row.ImageDigest, "engineVersion": row.EngineVersion, "reportedAt": row.ReportedAt, "freshness": row.Freshness, "findings": count, "summary": row.Summary})
 		}
-		return map[string]any{"clusterId": in.ClusterID, "items": items, "nextCursor": next, "totalReports": len(rows), "scope": "Operator reports and retained app scans; counts stay separate by source"}, nil
+		return map[string]any{"clusterId": in.ClusterID, "items": items, "nextCursor": next, "totalReports": len(rows), "warnings": warnings, "scope": "Operator reports and retained app scans; counts stay separate by source"}, nil
 	})
 	sidecar.Operation(s, "findings", func(ctx context.Context, in findingsInput) (reports.FindingPage, error) {
 		limit, err := pageSize(in.Limit)

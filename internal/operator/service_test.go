@@ -119,3 +119,16 @@ func TestAvailabilityPreservesOnlyKnownNamespaceScope(t *testing.T) {
 		}
 	}
 }
+
+func TestPartialInventoryKeepsServedCategoriesAndShowsDiscoveryFailures(t *testing.T) {
+	b := &broker{states: map[string]string{"vulnerability-reports": "served", "sbom-reports": "unknown"}}
+	rows, warnings, err := ListReportInventory(context.Background(), b, "cluster", nil)
+	if err != nil || len(rows) != 1 || len(warnings) != 1 || !strings.Contains(warnings[0], "sbom-reports") {
+		t.Fatalf("partial inventory: %+v %+v %v", rows, warnings, err)
+	}
+	b.readError = true
+	rows, warnings, err = ListReportInventory(context.Background(), b, "cluster", nil)
+	if err != nil || len(rows) != 0 || len(warnings) != 2 {
+		t.Fatalf("denied read: %+v %+v %v", rows, warnings, err)
+	}
+}

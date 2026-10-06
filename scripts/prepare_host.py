@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 import subprocess
 
-HOST_REVISION = "8a35f2be2b6399cbd875b8a8eab77e08ff94b3e0"
+HOST_REVISION = "442d0fc4b56a4f82a6dca0815cdc077eee0e3284"
 ROOT = Path(__file__).resolve().parents[1]
 
 

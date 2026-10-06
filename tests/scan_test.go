@@ -122,4 +122,33 @@ func TestNamespaceStreamCallsScopedJobAndPersistsCompletedReport(t *testing.T) {
 	if result.Metadata.State != "completed" || result.Metadata.Namespace != "team" {
 		t.Fatal(string(line["result"]))
 	}
+	call(5, "list-reports", map[string]any{"clusterId": "cluster", "namespace": "team"})
+	callback := read()
+	if string(callback["method"]) != `"host/bindingAvailability"` {
+		t.Fatal("no discovery callback")
+	}
+	var discovery struct{ Bindings []string }
+	json.Unmarshal(callback["params"], &discovery)
+	availability := []map[string]string{}
+	for _, name := range discovery.Bindings {
+		state := "absent"
+		if name == "sbom-reports" {
+			state = "unknown"
+		}
+		availability = append(availability, map[string]string{"binding": name, "state": state, "reason": "permission denied"})
+	}
+	send(map[string]any{"jsonrpc": "2.0", "id": callback["id"], "result": map[string]any{"bindings": availability}})
+	inventory := read()
+	if inventory["error"] != nil {
+		t.Fatal("retained scan hidden: " + string(inventory["error"]))
+	}
+	var partial struct {
+		Items    []struct{ ReportID string }
+		Warnings []string
+	}
+	json.Unmarshal(inventory["result"], &partial)
+	if len(partial.Items) != 1 || partial.Items[0].ReportID != reportID || len(partial.Warnings) != 1 {
+		t.Fatal(string(inventory["result"]))
+	}
+
 }

@@ -70,8 +70,13 @@ size limit. Scheduling or namespace quota refusal is an explicit failed scan.
 
 The host waits for the owned Job, checks Pod owner UID and terminal container
 exit status, and streams logs into an app-relative file capped at 8 MiB.
-A result response carries Job UID, namespace, scanner image/image ID, timestamps,
+A result response carries Job UID, namespace, declared scanner image, timestamps,
 app-relative result path and byte count. It never returns credentials or tokens.
+A failed worker can return `state: failed`, a safe structural error and a bounded
+private diagnostic path. The controller classifies known registry/database failures
+without returning raw log lines; it deletes the file and never saves a failed
+scan as a completed report. Unschedulable Jobs retain the scheduling reason.
+
 All Kubernetes requests have bounded timeouts. A dropped/cancelled call triggers
 owned-resource cleanup; UID preconditions prevent deleting a replacement Job.
 The active deadline/TTL and owner references cover host loss. Previous complete
