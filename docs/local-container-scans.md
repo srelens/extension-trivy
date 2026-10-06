@@ -6,6 +6,13 @@ supervisor and OS sandbox against `kind-srelens-demo`, namespace
 only the Go SDK and standard library; scanner execution, image layers and
 database downloads stay inside the temporary Kubernetes Job.
 
+Final clean-source acceptance used host commit
+`442d0fc4b56a4f82a6dca0815cdc077eee0e3284` and controller commit
+`0491dc716d40cfe94603bf6f2de7771a64a0b716`. The signed local package is
+1,458,034 bytes and is installed at app revision 19. Both original checkouts
+were fast-forwarded and the original Srelens desktop restarted on that host
+revision. This package is local; it has not been published.
+
 - Namespace scan: 17 findings — one critical vulnerability and 16 configuration
   findings. The scanner's own Job was excluded from normalized findings.
 - Image scan: `alpine:3.10`, one critical CVE, installed and fixed versions,
@@ -14,7 +21,8 @@ database downloads stay inside the temporary Kubernetes Job.
   an actionable access-denied error. No failed report or log plaintext was saved.
 - Cancellation: a running namespace Job was cancelled through the production
   stream bridge; its original UID and owned resources disappeared. Four prior
-  completed reports remained available.
+  completed reports remained available in the first acceptance run; six were
+  retained in the final clean-source run.
 - Cleanup: no scanner Job, Pod, ServiceAccount, Role, RoleBinding or readiness
   ConfigMap remained after success, failure or cancellation.
 

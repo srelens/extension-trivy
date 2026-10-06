@@ -100,5 +100,5 @@ Overview -> scan-namespace; user runs explicitly, cancels from the native page.
   confirm results, resource bounds, cancellation and owned-resource cleanup.
 - [x] Run required suites/builds and one final whole-branch review; fix important
   findings with TDD, sign/install the small controller locally and verify it.
-- [ ] Commit Angular changes, fast-forward the authorized local checkouts, leave
+- [x] Commit Angular changes, fast-forward the authorized local checkouts, leave
   Srelens running. Remote repository, release and catalog remain unrequested.
