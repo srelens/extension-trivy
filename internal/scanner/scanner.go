@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	dbtypes "github.com/aquasecurity/trivy-db/pkg/types"
 	"github.com/aquasecurity/trivy/pkg/commands/artifact"
 	ftypes "github.com/aquasecurity/trivy/pkg/fanal/types"
 	"github.com/aquasecurity/trivy/pkg/flag"
@@ -64,13 +65,14 @@ func ScanArchive(ctx context.Context, archivePath, dbDir string) (types.Report, 
 	}
 	defer os.RemoveAll(modules)
 	opts := flag.Options{
-		AppVersion:     Version,
-		GlobalOptions:  flag.GlobalOptions{CacheDir: root, Quiet: true, Timeout: 5 * time.Minute},
-		CacheOptions:   flag.CacheOptions{CacheBackend: "fs"},
-		DBOptions:      flag.DBOptions{SkipDBUpdate: true, SkipJavaDBUpdate: true, NoProgress: true},
-		ImageOptions:   flag.ImageOptions{Input: archive},
-		ModuleOptions:  flag.ModuleOptions{ModuleDir: modules},
-		PackageOptions: flag.PackageOptions{PkgTypes: types.PkgTypes, PkgRelationships: ftypes.Relationships},
+		AppVersion:           Version,
+		GlobalOptions:        flag.GlobalOptions{CacheDir: root, Quiet: true, Timeout: 5 * time.Minute},
+		CacheOptions:         flag.CacheOptions{CacheBackend: "fs"},
+		DBOptions:            flag.DBOptions{SkipDBUpdate: true, SkipJavaDBUpdate: true, NoProgress: true},
+		ImageOptions:         flag.ImageOptions{Input: archive},
+		ModuleOptions:        flag.ModuleOptions{ModuleDir: modules},
+		VulnerabilityOptions: flag.VulnerabilityOptions{VulnSeveritySources: []dbtypes.SourceID{"auto"}},
+		PackageOptions:       flag.PackageOptions{PkgTypes: types.PkgTypes, PkgRelationships: ftypes.Relationships},
 		ScanOptions: flag.ScanOptions{
 			Scanners:    types.Scanners{types.VulnerabilityScanner},
 			OfflineScan: true, Parallel: 1, SkipVersionCheck: true, DisableTelemetry: true,

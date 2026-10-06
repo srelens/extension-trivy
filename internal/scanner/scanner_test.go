@@ -58,6 +58,9 @@ func TestScanArchiveOffline(t *testing.T) {
 	for _, result := range report.Results {
 		for _, finding := range result.Vulnerabilities {
 			if finding.VulnerabilityID == "CVE-2019-1549" && finding.InstalledVersion == "1.1.1b-r1" && finding.FixedVersion == "1.1.1d-r0" {
+				if finding.Severity != "MEDIUM" || finding.SeveritySource == "" {
+					t.Fatalf("known vendor severity was lost: %s (source %s)", finding.Severity, finding.SeveritySource)
+				}
 				packages[finding.PkgName] = true
 			}
 		}
