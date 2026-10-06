@@ -2,6 +2,8 @@
 
 Host commit `c72ba93dc456312ccef02f589ca088cd596d733d` and controller
 commit `e82d652a130f34432ef8cf6319a4807a82053d1a` were verified on macOS arm64.
+Final UI polish is commit `19223403146aedfc508d61d6f78d60987c3b9fbb`;
+its backend and SDK source are identical to the pinned host above.
 The controller was built from committed source with a clean SDK checkout at the
 exact host pin. Its 1,460,289-byte local package was signed by the trusted srelens
 publisher and installed as app revision 20. No release or catalog publication
@@ -39,7 +41,10 @@ frontend tests passed; frontend line coverage was 92.18%.
 The real native components were driven at wide and narrow widths using captured
 signed scan results. Namespace scans wait for an explicit Run, terminal status
 remains visible, Findings opens with the pinned route, report metadata opens,
-and source filtering keeps report rows separate. Synthetic Operator reports
+and source filtering keeps report rows separate. Captured M01 inventory pages
+also passed Next/Previous navigation and wide/narrow checks. Long image,
+resource and container names preserve full values in titles and scan actions
+while keeping the wide pane’s namespace and container columns visible. Synthetic Operator reports
 were labeled as fixtures and used only for visual verification.
 
 Evidence is saved locally under `/private/tmp/srelens-trivy-ui-evidence`:

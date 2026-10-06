@@ -19,5 +19,6 @@
     "pages": 17,
     "mode": "signed production sidecar and macOS sandbox; M01 all namespaces",
     "appRevision": 20
-  }
+  },
+  "uiRevision": "19223403146aedfc508d61d6f78d60987c3b9fbb"
 }
