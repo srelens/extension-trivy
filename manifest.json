@@ -1,0 +1,1488 @@
+{
+  "id": "org.srelens.trivy",
+  "name": "Trivy",
+  "version": "0.2.0",
+  "srelensApiVersion": "^0.8",
+  "kind": "executable",
+  "permissions": [
+    "k8s.listWorkloadImages",
+    "k8s.listCustomResource",
+    "k8s.runJob"
+  ],
+  "capabilities": [
+    {
+      "name": "deployment-images",
+      "title": "Deployment images",
+      "target": "k8s.listWorkloadImages",
+      "arguments": {
+        "kind": "Deployment"
+      },
+      "inputs": [
+        "context",
+        "namespace",
+        "cursor"
+      ]
+    },
+    {
+      "name": "statefulset-images",
+      "title": "StatefulSet images",
+      "target": "k8s.listWorkloadImages",
+      "arguments": {
+        "kind": "StatefulSet"
+      },
+      "inputs": [
+        "context",
+        "namespace",
+        "cursor"
+      ]
+    },
+    {
+      "name": "daemonset-images",
+      "title": "DaemonSet images",
+      "target": "k8s.listWorkloadImages",
+      "arguments": {
+        "kind": "DaemonSet"
+      },
+      "inputs": [
+        "context",
+        "namespace",
+        "cursor"
+      ]
+    },
+    {
+      "name": "vulnerability-reports",
+      "title": "List VulnerabilityReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "vulnerabilityreports",
+        "kind": "VulnerabilityReport",
+        "namespaced": true,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context",
+        "namespace"
+      ]
+    },
+    {
+      "name": "cluster-vulnerability-reports",
+      "title": "List ClusterVulnerabilityReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "clustervulnerabilityreports",
+        "kind": "ClusterVulnerabilityReport",
+        "namespaced": false,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context"
+      ]
+    },
+    {
+      "name": "config-audit-reports",
+      "title": "List ConfigAuditReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "configauditreports",
+        "kind": "ConfigAuditReport",
+        "namespaced": true,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context",
+        "namespace"
+      ]
+    },
+    {
+      "name": "cluster-config-audit-reports",
+      "title": "List ClusterConfigAuditReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "clusterconfigauditreports",
+        "kind": "ClusterConfigAuditReport",
+        "namespaced": false,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context"
+      ]
+    },
+    {
+      "name": "rbac-assessment-reports",
+      "title": "List RbacAssessmentReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "rbacassessmentreports",
+        "kind": "RbacAssessmentReport",
+        "namespaced": true,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context",
+        "namespace"
+      ]
+    },
+    {
+      "name": "cluster-rbac-assessment-reports",
+      "title": "List ClusterRbacAssessmentReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "clusterrbacassessmentreports",
+        "kind": "ClusterRbacAssessmentReport",
+        "namespaced": false,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context"
+      ]
+    },
+    {
+      "name": "infra-assessment-reports",
+      "title": "List InfraAssessmentReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "infraassessmentreports",
+        "kind": "InfraAssessmentReport",
+        "namespaced": true,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context",
+        "namespace"
+      ]
+    },
+    {
+      "name": "cluster-infra-assessment-reports",
+      "title": "List ClusterInfraAssessmentReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "clusterinfraassessmentreports",
+        "kind": "ClusterInfraAssessmentReport",
+        "namespaced": false,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context"
+      ]
+    },
+    {
+      "name": "sbom-reports",
+      "title": "List SbomReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "sbomreports",
+        "kind": "SbomReport",
+        "namespaced": true,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context",
+        "namespace"
+      ]
+    },
+    {
+      "name": "cluster-sbom-reports",
+      "title": "List ClusterSbomReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "clustersbomreports",
+        "kind": "ClusterSbomReport",
+        "namespaced": false,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context"
+      ]
+    },
+    {
+      "name": "compliance-reports",
+      "title": "List ClusterComplianceReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "clustercompliancereports",
+        "kind": "ClusterComplianceReport",
+        "namespaced": false,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".status.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".status.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".status.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".status.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".status.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".status.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".status.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".status.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".status.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context"
+      ]
+    },
+    {
+      "name": "exposed-secret-reports",
+      "title": "List ExposedSecretReport objects",
+      "target": "k8s.listCustomResource",
+      "arguments": {
+        "group": "aquasecurity.github.io",
+        "version": "v1alpha1",
+        "plural": "exposedsecretreports",
+        "kind": "ExposedSecretReport",
+        "namespaced": true,
+        "printerColumns": [
+          {
+            "name": "0",
+            "type": "string",
+            "jsonPath": ".metadata.uid"
+          },
+          {
+            "name": "1",
+            "type": "string",
+            "jsonPath": ".metadata.resourceVersion"
+          },
+          {
+            "name": "2",
+            "type": "string",
+            "jsonPath": ".report.updateTimestamp"
+          },
+          {
+            "name": "3",
+            "type": "string",
+            "jsonPath": ".report.scanner.version"
+          },
+          {
+            "name": "4",
+            "type": "string",
+            "jsonPath": ".report.artifact.repository"
+          },
+          {
+            "name": "5",
+            "type": "string",
+            "jsonPath": ".report.artifact.digest"
+          },
+          {
+            "name": "6",
+            "type": "string",
+            "jsonPath": ".report.summary.criticalCount"
+          },
+          {
+            "name": "7",
+            "type": "string",
+            "jsonPath": ".report.summary.highCount"
+          },
+          {
+            "name": "8",
+            "type": "string",
+            "jsonPath": ".report.summary.mediumCount"
+          },
+          {
+            "name": "9",
+            "type": "string",
+            "jsonPath": ".report.summary.lowCount"
+          },
+          {
+            "name": "10",
+            "type": "string",
+            "jsonPath": ".report.summary.unknownCount"
+          }
+        ]
+      },
+      "inputs": [
+        "context",
+        "namespace"
+      ]
+    },
+    {
+      "name": "namespace-job",
+      "title": "Scan namespace (vuln,misconfig)",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "trivy"
+        ],
+        "args": [
+          "k8s",
+          "--format",
+          "json",
+          "--report",
+          "all",
+          "--scanners",
+          "vuln,misconfig",
+          "--disable-node-collector",
+          "--include-namespaces",
+          "${inputs.namespace}",
+          "--include-kinds",
+          "Deployment,StatefulSet,DaemonSet,Pod,Job,CronJob,Service,ConfigMap,ServiceAccount,Role,RoleBinding,NetworkPolicy,Ingress,PersistentVolumeClaim,LimitRange,ResourceQuota,PodDisruptionBudget",
+          "--exclude-owned",
+          "--timeout",
+          "15m",
+          "--parallel",
+          "1",
+          "--no-progress",
+          "--quiet"
+        ],
+        "inputNames": [
+          "namespace"
+        ],
+        "readRules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods",
+              "services",
+              "configmaps",
+              "serviceaccounts",
+              "persistentvolumeclaims",
+              "limitranges",
+              "resourcequotas"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "apps"
+            ],
+            "resources": [
+              "deployments",
+              "statefulsets",
+              "daemonsets",
+              "replicasets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "batch"
+            ],
+            "resources": [
+              "jobs",
+              "cronjobs"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "networking.k8s.io"
+            ],
+            "resources": [
+              "ingresses",
+              "networkpolicies"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "rbac.authorization.k8s.io"
+            ],
+            "resources": [
+              "roles",
+              "rolebindings"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "policy"
+            ],
+            "resources": [
+              "poddisruptionbudgets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "namespace-config-job",
+      "title": "Scan namespace (misconfig)",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "trivy"
+        ],
+        "args": [
+          "k8s",
+          "--format",
+          "json",
+          "--report",
+          "all",
+          "--scanners",
+          "misconfig",
+          "--disable-node-collector",
+          "--include-namespaces",
+          "${inputs.namespace}",
+          "--include-kinds",
+          "Deployment,StatefulSet,DaemonSet,Pod,Job,CronJob,Service,ConfigMap,ServiceAccount,Role,RoleBinding,NetworkPolicy,Ingress,PersistentVolumeClaim,LimitRange,ResourceQuota,PodDisruptionBudget",
+          "--exclude-owned",
+          "--timeout",
+          "15m",
+          "--parallel",
+          "1",
+          "--no-progress",
+          "--quiet"
+        ],
+        "inputNames": [
+          "namespace"
+        ],
+        "readRules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods",
+              "services",
+              "configmaps",
+              "serviceaccounts",
+              "persistentvolumeclaims",
+              "limitranges",
+              "resourcequotas"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "apps"
+            ],
+            "resources": [
+              "deployments",
+              "statefulsets",
+              "daemonsets",
+              "replicasets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "batch"
+            ],
+            "resources": [
+              "jobs",
+              "cronjobs"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "networking.k8s.io"
+            ],
+            "resources": [
+              "ingresses",
+              "networkpolicies"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "rbac.authorization.k8s.io"
+            ],
+            "resources": [
+              "roles",
+              "rolebindings"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "policy"
+            ],
+            "resources": [
+              "poddisruptionbudgets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "namespace-vulnerability-job",
+      "title": "Scan namespace (vuln)",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "trivy"
+        ],
+        "args": [
+          "k8s",
+          "--format",
+          "json",
+          "--report",
+          "all",
+          "--scanners",
+          "vuln",
+          "--disable-node-collector",
+          "--include-namespaces",
+          "${inputs.namespace}",
+          "--include-kinds",
+          "Deployment,StatefulSet,DaemonSet,Pod,Job,CronJob,Service,ConfigMap,ServiceAccount,Role,RoleBinding,NetworkPolicy,Ingress,PersistentVolumeClaim,LimitRange,ResourceQuota,PodDisruptionBudget",
+          "--exclude-owned",
+          "--timeout",
+          "15m",
+          "--parallel",
+          "1",
+          "--no-progress",
+          "--quiet"
+        ],
+        "inputNames": [
+          "namespace"
+        ],
+        "readRules": [
+          {
+            "apiGroups": [
+              ""
+            ],
+            "resources": [
+              "pods",
+              "services",
+              "configmaps",
+              "serviceaccounts",
+              "persistentvolumeclaims",
+              "limitranges",
+              "resourcequotas"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "apps"
+            ],
+            "resources": [
+              "deployments",
+              "statefulsets",
+              "daemonsets",
+              "replicasets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "batch"
+            ],
+            "resources": [
+              "jobs",
+              "cronjobs"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "networking.k8s.io"
+            ],
+            "resources": [
+              "ingresses",
+              "networkpolicies"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "rbac.authorization.k8s.io"
+            ],
+            "resources": [
+              "roles",
+              "rolebindings"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          },
+          {
+            "apiGroups": [
+              "policy"
+            ],
+            "resources": [
+              "poddisruptionbudgets"
+            ],
+            "verbs": [
+              "get",
+              "list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "image-job",
+      "title": "Scan image vulnerabilities",
+      "target": "k8s.runJob",
+      "inputs": [],
+      "arguments": {
+        "image": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+        "command": [
+          "/bin/sh",
+          "-c"
+        ],
+        "args": [
+          "case $(uname -m) in aarch64|arm64) platform=linux/arm64;; x86_64) platform=linux/amd64;; *) echo unsupported-worker-architecture >&2; exit 1;; esac; exec trivy image --format json --scanners vuln --platform \"$platform\" --timeout 15m --parallel 1 --no-progress --quiet -- \"$1\"",
+          "trivy-scan",
+          "${inputs.image}"
+        ],
+        "inputNames": [
+          "image"
+        ],
+        "readRules": []
+      }
+    }
+  ],
+  "sidecar": {
+    "binaries": {
+      "darwin-arm64": "bin/darwin-arm64/trivy-sidecar"
+    },
+    "operations": [
+      {
+        "name": "source-status",
+        "title": "Overview",
+        "view": {
+          "autoRun": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "maxLength": 63
+          }
+        ]
+      },
+      {
+        "name": "list-images",
+        "title": "Images",
+        "view": {
+          "autoRun": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "maxLength": 63
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "maxLength": 8192
+          }
+        ]
+      },
+      {
+        "name": "list-reports",
+        "title": "Reports",
+        "view": {
+          "autoRun": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "maxLength": 63
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "maxLength": 8192
+          },
+          {
+            "name": "limit",
+            "type": "integer"
+          }
+        ]
+      },
+      {
+        "name": "findings",
+        "title": "Findings",
+        "view": {
+          "autoRun": true,
+          "hidden": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "maxLength": 63
+          },
+          {
+            "name": "reportId",
+            "type": "string",
+            "required": true,
+            "maxLength": 64
+          },
+          {
+            "name": "cursor",
+            "type": "string",
+            "maxLength": 8192
+          },
+          {
+            "name": "limit",
+            "type": "integer"
+          }
+        ]
+      },
+      {
+        "name": "scan-namespace",
+        "title": "Scan namespace",
+        "view": {
+          "stream": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "required": true,
+            "maxLength": 63
+          }
+        ]
+      },
+      {
+        "name": "scan-image",
+        "title": "Scan image",
+        "view": {
+          "stream": true
+        },
+        "inputs": [
+          {
+            "name": "clusterId",
+            "type": "string",
+            "required": true,
+            "maxLength": 4096
+          },
+          {
+            "name": "namespace",
+            "title": "Namespace",
+            "type": "string",
+            "required": true,
+            "maxLength": 63
+          },
+          {
+            "name": "image",
+            "title": "Image",
+            "type": "string",
+            "required": true,
+            "maxLength": 512
+          }
+        ]
+      }
+    ]
+  },
+  "contributions": {
+    "pages": [],
+    "detailTabs": [],
+    "detailLinks": []
+  }
+}

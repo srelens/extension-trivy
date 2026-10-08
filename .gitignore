@@ -1,7 +1,14 @@
 .host/
+.host-v0.2/
 dist/
 bin/
 .screenshots/
 .DS_Store
 coverage.out
 *.test
+.fixtures/
+.superpowers/
+.trivy/
+__pycache__/
+.host-job/
+.host-job-*/

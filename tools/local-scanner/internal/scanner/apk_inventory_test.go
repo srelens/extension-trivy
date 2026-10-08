@@ -1,0 +1,85 @@
+// Diagnostic acceptance probe, intentionally outside the passing Go suite.
+// Copy into internal/scanner/candidate_apk_test.go to reproduce the pinned
+// candidate's incomplete APK inventory. This must pass before production use.
+package scanner
+
+import (
+	"archive/tar"
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/empty"
+	"github.com/google/go-containerregistry/pkg/v1/mutate"
+	"github.com/google/go-containerregistry/pkg/v1/tarball"
+)
+
+func TestAPKInventoryMustNotBePartiallyClean(t *testing.T) {
+	for _, size := range []int{70 * 1024, 5 * 1024 * 1024} {
+		t.Run(fmt.Sprint(size), func(t *testing.T) { checkAPKInventory(t, size) })
+	}
+}
+
+func checkAPKInventory(t *testing.T, size int) {
+	data, _ := fixture(t)
+	inventory := "P:fixture-package\nV:1.0-r0\nA:x86_64\no:fixture-package\n\n" +
+		"T:" + strings.Repeat("x", size) + "\n\n" +
+		"P:libssl1.1\nV:1.1.1b-r1\nA:x86_64\no:openssl\n\n"
+	var contents bytes.Buffer
+	writer := tar.NewWriter(&contents)
+	for path, value := range map[string]string{
+		"etc/os-release":       "ID=alpine\nVERSION_ID=3.9.4\n",
+		"etc/alpine-release":   "3.9.4\n",
+		"lib/apk/db/installed": inventory,
+	} {
+		if err := writer.WriteHeader(&tar.Header{Name: path, Size: int64(len(value)), Mode: 0o644}); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := io.WriteString(writer, value); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	layer, err := tarball.LayerFromReader(&contents)
+	if err != nil {
+		t.Fatal(err)
+	}
+	image, err := mutate.AppendLayers(empty.Image, layer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tag, err := name.NewTag("example.invalid/partial:fixture")
+	if err != nil {
+		t.Fatal(err)
+	}
+	archive := filepath.Join(data, "partial-apk.tar")
+	if err := tarball.WriteToFile(archive, tag, image); err != nil {
+		t.Fatal(err)
+	}
+	report, err := ScanArchive(context.Background(), archive, data)
+	if errors.Is(err, ErrUnsupported) {
+		return
+	}
+	if err != nil {
+		if size > 4*1024*1024 && strings.Contains(err.Error(), "incomplete APK inventory") {
+			return
+		}
+		t.Fatal(err)
+	}
+	for _, result := range report.Results {
+		for _, finding := range result.Vulnerabilities {
+			if finding.VulnerabilityID == "CVE-2019-1549" && finding.PkgName == "libssl1.1" {
+				return
+			}
+		}
+	}
+	t.Fatal("scanner silently dropped vulnerable APK inventory")
+}

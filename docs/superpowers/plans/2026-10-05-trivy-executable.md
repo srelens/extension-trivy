@@ -8,7 +8,15 @@
 
 **Tech Stack:** Go 1.27.0 or later for the selected Trivy candidate, srelens Go SDK, Trivy v0.75.0 candidate, existing Rust registry/sandbox/protocol, React host components, Python/Node packaging conventions from cert-manager.
 
-**Spec:** [Trivy design](../specs/2026-10-05-trivy-design.md). Read it before executing. This repository is currently documentation only.
+**Spec:** [Trivy design](../specs/2026-10-05-trivy-design.md). Read it before executing. Task 1 has a working feasibility prototype; [evidence](../../feasibility.md) records what passed and what blocks production work.
+
+**Current ruling, 2026-10-06:** The user authorized local macOS implementation
+and testing, executable packages up to 512 MiB, and a production-Trivy-only
+2 GiB data allowance. Native reader UI is confirmed by the user's M01 screenshot.
+Continue local OCI/scanner work under these allowances; historical Task 1
+limits and cross-platform release gates below do not override this approval.
+Production DB memory and cancellation still require measurement. Linux/Windows
+runtime acceptance and signed release/catalog publication remain separate gates.
 
 ## Global constraints
 
@@ -17,10 +25,10 @@
 - Operator integration is in the first release: preserve source/category/subject/timestamp, avoid double-counting and redact exposed-secret matches from rendered, stored normalized and exported details.
 - TDD: failing behavioral test → observed failure → minimal implementation → passing test → Angular conventional commit. No co-author trailers; no PR or publication without a user request.
 - No subprocess, direct network, kubeconfig, Kubernetes Secret read, external scanner server or application HTML/JavaScript renderer.
-- Keep the host's 256 MiB memory, one CPU, 1 GiB data and 30-second ordinary request limits. Long scans use cancellable streams.
+- Keep the host's 256 MiB memory, one CPU and 30-second ordinary request limits. The user approved 2 GiB aggregate data for production `org.srelens.trivy` on 2026-10-06; other apps retain 1 GiB. Long scans use cancellable streams.
 - One active scan, at most 10 completed reports, findings pages of 1–100 rows, 512-byte image references and a visible stale-DB threshold of 24 hours.
 - Never claim a failed/incomplete/stale scan is clean. Pin cluster, namespace, app revision, image digest, target platform, engine version and DB digest.
-- Inspected host baseline: `d3fd0618239b91ec83aa354bea57beeea41c464a`. Trivy candidate: `591e9799316a602e703f0b484f6c6d7b234ec8f3`. Neither is yet recorded as tested compatibility.
+- Inspected host baseline: `d3fd0618239b91ec83aa354bea57beeea41c464a`. Trivy candidate: `591e9799316a602e703f0b484f6c6d7b234ec8f3`, with one documented fd-chmod patch. Linux arm64 fixture execution is verified; this is not complete app/platform compatibility.
 - Production implementation starts only after the feasibility/contract gate below passes and this design/plan is reviewed. Plan creation does not authorize release publication.
 
 ## Review focus
@@ -52,15 +60,18 @@ Create during implementation, not as empty scaffolding:
 
 **Interfaces:** Introduce `ScanArchive(ctx context.Context, archivePath, dbDir string) (types.Report, error)` in `internal/scanner`. Paths are supplied by a test harness now and by the broker in production. The host-contract document owns exact broker/UI names, wire payloads and version negotiations proposed by the design.
 
-- [ ] Write `TestScanArchiveOffline` with a digest-pinned image/archive and DB fixture: assert a known vulnerability occurrence, a non-empty engine/DB identity, and no direct network or subprocess attempt. Add `TestUnsupportedIsNotClean`, `TestCancelledScanStops`, and archive path/symlink refusal cases.
-- [ ] Run `go test ./internal/scanner -run 'TestScanArchive|TestUnsupported|TestCancelled' -count=1`; observe failure before adding the scanner body.
-- [ ] Prepare the exact host checkout. Implement the smallest adapter around the pinned Trivy artifact API, disabling downloads, telemetry, updates, VEX and remote analyzer lookups. Use the scoped directory for all temporary files; validate the OCI archive representation Trivy actually accepts.
+- [x] Write `TestScanArchiveOffline` with a digest-pinned image/archive and DB fixture: assert a known vulnerability occurrence, a non-empty engine/DB identity, and no direct network or subprocess attempt. Add `TestUnsupportedIsNotClean`, `TestCancelledScanStops`, and archive path/symlink refusal cases.
+- [x] Run `go test ./internal/scanner -run 'TestScanArchive|TestUnsupported|TestCancelled' -count=1`; observe failure before adding the scanner body.
+- [x] Prepare the exact host checkout. Implement the smallest adapter around the pinned Trivy artifact API, disabling downloads, telemetry, updates, VEX and remote analyzer lookups. Use the scoped directory for all temporary files; validate the OCI archive representation Trivy actually accepts.
 - [ ] Run the tests, then run the same binary under the real host supervisor/sandbox on Linux and Windows. Measure peak memory, disk, CPU and cancellation; verify archive mode-setting behavior in the sandbox. Use `go test -race ./...` and the host's `sandbox_conformance` suite.
 - [ ] Record actual image/DB digests, versions, RSS, disk usage, outcomes and fixture preparation in `docs/feasibility.md`. Test regular/init containers, platform-specific artifacts and duplicate CVE occurrences in different targets.
 - [ ] Finalize the host contract with exact scalar inputs, stream frames and proposed `host/fetchOciArtifact` request/response. Verify the contract against existing SDK/protocol/host source; do not describe proposed methods as existing ones.
-- [ ] Commit: `test(trivy): prove offline scanner sandbox compatibility`.
+- [ ] Verify a real stripped executable through the native package path. Current result: the native packer refuses the binary because it exceeds 64 MiB; gzip also exceeds the 16 MiB compressed limit. Revise integration/distribution for review before proceeding.
+- [x] Commit the reviewed partial proof with an honest Angular subject such as `feat(trivy): add offline scanner feasibility prototype`. Do not imply the full gate passed.
 
-**Gate:** The proof must fit 256 MiB memory and 1 GiB data, run without ambient network/subprocesses, and leave the host responsive. If it does not, stop production implementation and report the measured constraint. Obtain review of the proof/contract before Task 2; do not bypass isolation or require an Operator/server.
+**Gate:** The proof must fit 256 MiB memory, 1 GiB data and the current native package format, run without ambient network/subprocesses, and leave the host responsive on the required real platforms. If it does not, stop production implementation and report the measured constraint. Obtain review of the proof/contract before Task 2; do not bypass isolation, raise global limits or require an Operator/server.
+
+**Partial evidence:** Linux arm64 scan/early-cancellation/health checks and all 14 Linux host conformance cases passed. Windows amd64 cross-compiles, but AppContainer execution is pending; Linux amd64 execution is also unverified. True in-flight cancellation remains unproven. A separately reproduced APK inventory-truncation diagnostic currently fails the desired completeness assertion and blocks production. [Host contracts](../../host-contract.md) remain unchecked proposals, including distribution, atomic aggregate-budget reservation and stable input-lifetime decisions. Regular/init-container discovery, production DBs and all subsequent tasks remain pending.
 
 ## Task 2: Add the generic host capabilities the proof requires
 
@@ -141,4 +152,4 @@ Create during implementation, not as empty scaffolding:
 
 ## Next action
 
-Review this design and plan, then start Task 1. No application implementation, host API changes, GitHub repository creation or release publication has happened as part of writing these documents.
+Finish Task 1's package/distribution and complete-inventory decisions, prove in-flight cancellation, obtain a Windows runner for real AppContainer execution and review the measured proof and proposed host contracts. Do not start production Tasks 2–6 while those gates remain open. No production host changes, remote repository creation or release publication has happened.

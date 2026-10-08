@@ -1,0 +1,16 @@
+{
+  "id": "org.srelens.trivy-preview",
+  "name": "Trivy local preview",
+  "version": "0.1.0",
+  "srelensApiVersion": "^0.7",
+  "kind": "executable",
+  "permissions": [],
+  "capabilities": [],
+  "sidecar": {
+    "binaries": { "darwin-arm64": "bin/darwin-arm64/trivy-probe" },
+    "operations": [
+      { "name": "scan-fixture", "title": "Scan the offline feasibility fixture" }
+    ]
+  },
+  "contributions": { "pages": [], "detailTabs": [], "detailLinks": [] }
+}

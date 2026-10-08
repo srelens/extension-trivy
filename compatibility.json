@@ -1,0 +1,24 @@
+{
+  "status": "local-development-accepted",
+  "hostRevision": "c72ba93dc456312ccef02f589ca088cd596d733d",
+  "extensionApi": "^0.8",
+  "sidecarProtocol": "0.2.0",
+  "trivyVersion": "0.75.0",
+  "scannerImage": "aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa",
+  "controllerPlatforms": {
+    "darwin-arm64": "sandbox-and-live-scans-tested",
+    "linux-amd64": "not-tested",
+    "linux-arm64": "not-tested",
+    "windows-amd64": "not-tested"
+  },
+  "scannerPlatform": "Linux in Kubernetes; namespace default image platform and manual worker architecture",
+  "releasePublished": false,
+  "inventoryAcceptance": {
+    "images": 1880,
+    "namespaces": 59,
+    "pages": 17,
+    "mode": "signed production sidecar and macOS sandbox; M01 all namespaces",
+    "appRevision": 20
+  },
+  "uiRevision": "19223403146aedfc508d61d6f78d60987c3b9fbb"
+}
