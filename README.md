@@ -21,7 +21,20 @@ The controller uses extension API 0.8 and sidecar protocol 0.2.0 from pinned hos
 - [Host contract and proposed scanning additions](docs/host-contract.md)
 - [Contributor rules](AGENTS.md)
 
-Prepare the pinned host SDK with `scripts/prepare_host.py` before running normal Go commands. Trivy source and fixtures are needed only to reproduce the optional historical scanner proof. The controller still requires actual platform sandbox acceptance before claiming release compatibility.
+Prepare the pinned host SDK before running normal Go commands:
+
+```bash
+python3 scripts/prepare_host.py
+go test -race ./...
+python3 -m unittest discover -s scripts -p 'test_*.py'
+CGO_ENABLED=0 go build -trimpath -o bin/trivy-sidecar ./cmd/trivy-sidecar
+```
+
+The host additions are under review in [srelens/srelens#842](https://github.com/srelens/srelens/pull/842).
+CI fetches the exact SDK revision, runs controller race and contract tests, and
+builds all four declared controller platforms. Building a platform does not
+establish sandbox acceptance on that platform.
+ Trivy source and fixtures are needed only to reproduce the optional historical scanner proof. The controller still requires actual platform sandbox acceptance before claiming release compatibility.
 
 ## First release
 
@@ -35,7 +48,7 @@ Prepare the pinned host SDK with `scripts/prepare_host.py` before running normal
 
 The scanner runs as a Linux container in Kubernetes; controller platform acceptance remains separate. The current macOS reader package has passed supervisor/sandbox and native UI checks. The web host currently refuses executable apps. Private-registry fallback scans are later work. Operator integration is part of the first release, while Operator installation remains optional.
 
-Development uses TDD, Angular conventional commits, and no co-author trailers. Creating a GitHub repository, opening a PR and publishing releases are separate follow-up actions.
+Development uses TDD, Angular conventional commits, and no co-author trailers. The implementation is reviewed in this repository; signed release and catalog publication remain separate follow-up actions.
 
 ## Run a namespace check
 

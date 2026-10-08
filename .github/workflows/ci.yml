@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  controller:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Prepare pinned host SDK
+        run: python3 scripts/prepare_host.py
+      - name: Test controller and contracts
+        run: |
+          go test -race -count=1 ./...
+          python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Build controller platforms
+        shell: bash
+        run: |
+          for platform in darwin/arm64 linux/amd64 linux/arm64 windows/amd64; do
+            GOOS="${platform%/*}" GOARCH="${platform#*/}" CGO_ENABLED=0 \
+              go build -trimpath -o "bin/${platform/\//-}/trivy-sidecar" ./cmd/trivy-sidecar
+          done
