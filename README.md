@@ -30,7 +30,7 @@ python3 -m unittest discover -s scripts -p 'test_*.py'
 CGO_ENABLED=0 go build -trimpath -o bin/trivy-sidecar ./cmd/trivy-sidecar
 ```
 
-The host additions are under review in [srelens/srelens#842](https://github.com/srelens/srelens/pull/842).
+The host additions merged into `dev` in [srelens/srelens#842](https://github.com/srelens/srelens/pull/842) on 2026-10-08. The SDK pin and recorded acceptance above still identify the exact host revision tested locally; they do not claim acceptance against a newly released host.
 CI fetches the exact SDK revision, runs controller race and contract tests, and
 builds all four declared controller platforms. Building a platform does not
 establish sandbox acceptance on that platform.
